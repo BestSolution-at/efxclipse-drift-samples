@@ -60,6 +60,7 @@ public class Demo extends Application {
 		ComboBox<ARenderer> renderers = new ComboBox<>();
 		renderers.setButtonCell(new CellImpl());
 		renderers.setCellFactory(v -> new CellImpl());
+		renderers.getItems().add(new SwapChainColorRenderer(surface0));
 		renderers.getItems().add(new SimpleColorRenderer(surface0));
 		renderers.getItems().add(new SimpleTriangleRenderer(surface0));
 		renderers.getSelectionModel().select(renderers.getItems().get(0));
@@ -98,7 +99,7 @@ public class Demo extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		DriftFXSurface.initialize(DriftFXConfig.initSystemProperties().debug(true).logLevel(3));
+		DriftFXSurface.initialize(DriftFXConfig.initSystemProperties().debug(false).logLevel(0));
 
 		BorderPane root = new BorderPane();
 		root.setPrefSize(400, 300);

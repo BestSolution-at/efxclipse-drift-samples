@@ -38,20 +38,20 @@ namespace prism {
 namespace d3d {
 
 
-class NVDXInteropTransferMode : public TransferMode {
+class NVDXInteropTransferMode : public TransferModeImpl {
 public:
 	SharedTexture* CreateSharedTexture(GLContext* glContext, Context* fxContext, math::Vec2ui size) {
        	D3D9ExContext* d3dContext = dynamic_cast<D3D9ExContext*>(fxContext);
 	    return new D3DSharedTexture(glContext, d3dContext, size);
     }
-	int OnTextureCreated(prism::PrismBridge* bridge, Frame* frame, jobject fxTexture) {
-		return D3DSharedTexture::OnTextureCreated(bridge, frame, fxTexture);
+	int OnTextureCreated(prism::PrismBridge* bridge, ShareData* shareData, jobject fxTexture) {
+		return D3DSharedTexture::OnTextureCreated(bridge, shareData, fxTexture);
     }
 	virtual bool isPlatformDefault() {
 		return true;
 	}
 protected:
-	NVDXInteropTransferMode() : TransferMode("NVDXInterop") {}
+	NVDXInteropTransferMode() : TransferModeImpl("NVDXInterop") {}
 	static TransferModeId registered;
 };
 

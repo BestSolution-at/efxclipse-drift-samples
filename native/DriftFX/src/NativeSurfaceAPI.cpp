@@ -69,7 +69,7 @@ extern "C" JNIEXPORT void JNICALL Java_org_eclipse_fx_drift_internal_NativeAPI_n
 }
 
 
-jobject convert(JNIEnv* env, TransferMode* mode) {
+jobject convert(JNIEnv* env, TransferModeImpl* mode) {
 	jclass jTransferModeCls = env->FindClass("org/eclipse/fx/drift/DriftFXSurface$TransferMode");
 	jmethodID jNew = env->GetMethodID(jTransferModeCls, "<init>", "(Ljava/lang/String;I)V");
 	jstring name = env->NewStringUTF(mode->Name().c_str());
@@ -123,7 +123,6 @@ extern "C" JNIEXPORT jobjectArray JNICALL Java_org_eclipse_fx_drift_internal_Nat
 	//return result;
 }
 
-
 extern "C" JNIEXPORT jint JNICALL Java_org_eclipse_fx_drift_internal_NativeAPI_nOnTextureCreated(JNIEnv* env, jclass cls, jlong surfaceId, jlong frameId, jobject fxTexture) {
 	auto begin = std::chrono::steady_clock::now();
 
@@ -141,7 +140,10 @@ extern "C" JNIEXPORT jint JNICALL Java_org_eclipse_fx_drift_internal_NativeAPI_n
 
 	LogDebug(" -> surfaceData.transferMode = " << surfaceData.transferMode );
 
-	jint result = prism::PrismBridge::Get()->OnTextureCreated(frame, fxTexture);
+	auto data = frame->GetData();
+	data->transferMode = surfaceData.transferMode; // hack for now to transport the transferMode id
+
+	jint result = prism::PrismBridge::Get()->OnTextureCreated(data, fxTexture);
 
 	frame->fxPresentBegin = begin;
 	frame->fxPresentEnd = std::chrono::steady_clock::now();

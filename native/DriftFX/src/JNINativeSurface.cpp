@@ -20,6 +20,9 @@
 #include "JNINativeSurface.h"
 
 #include "jni/JNITiming.h"
+#include "jni/JNISwapChain.h"
+
+#include "SharedTextureSwapChain.h"
 
 using namespace std;
 
@@ -86,21 +89,28 @@ jobject jni::SurfaceData::New(JNIEnv* env, jfloat width, jfloat height, jfloat r
 // NativeSurface
 jclass jni::NativeSurface::cls = nullptr;
 jmethodID jni::NativeSurface::present = nullptr;
+jmethodID jni::NativeSurface::setSwapChain = nullptr;
 
 void jni::NativeSurface::Initialize(JNIEnv* env) {
 	cls = ResolveClass(env, "org/eclipse/fx/drift/internal/JNINativeSurface");
 	cls = (jclass)env->NewGlobalRef(cls);
 	present = ResolveMethod(env, cls, "present", "(Lorg/eclipse/fx/drift/internal/Frame;)V");
+	setSwapChain = ResolveMethod(env, cls, "setSwapChain", "(Lorg/eclipse/fx/drift/internal/SwapChain;)V");
 }
 
 void jni::NativeSurface::Dispose(JNIEnv* env) {
 	env->DeleteGlobalRef(cls);
 	cls = nullptr;
 	present = nullptr;
+	setSwapChain = nullptr;
 }
 
 void jni::NativeSurface::Present(JNIEnv* env, jobject nativeSurface, jobject frame) {
 	env->CallVoidMethod(nativeSurface, present, frame);
+}
+
+void jni::NativeSurface::SetSwapChain(JNIEnv* env, jobject nativeSurface, jobject swapChain) {
+	env->CallVoidMethod(nativeSurface, setSwapChain, swapChain);
 }
 
 void JNINativeSurface::Initialize() {
@@ -112,6 +122,8 @@ void JNINativeSurface::Initialize() {
 
 	jni::Timing::Initialize(env);
 
+	jni::SwapChain::Initialize(env);
+	jni::SwapChainImage::Initialize(env);
 	LogDebug("initialization complete")
 }
 void JNINativeSurface::Dispose() {
@@ -119,6 +131,9 @@ void JNINativeSurface::Dispose() {
 	jni::Frame::Dispose(env);
 	jni::SurfaceData::Dispose(env);
 	jni::NativeSurface::Dispose(env);
+	jni::Timing::Dispose(env);
+	jni::SwapChain::Dispose(env);
+	jni::SwapChainImage::Dispose(env);
 }
 
 JNINativeSurface::JNINativeSurface(jobject javaNativeSurface) {
@@ -146,4 +161,9 @@ void JNINativeSurface::Present(Frame* frame) {
 	jobject jFrame = jni::Frame::New(env, frame->GetSurfaceId(), frame->GetFrameId(), frame->GetWidth(), frame->GetHeight(), jSurfaceData, frame->GetPresentationHint());
 
 	jni::NativeSurface::Present(env, jNativeSurfaceInstance, jFrame);
+}
+
+void JNINativeSurface::SetSwapChain(SharedTextureSwapChain* swapChain) {
+	JNIEnv *env = JNIHelper::GetJNIEnv(true);
+	jni::NativeSurface::SetSwapChain(env, jNativeSurfaceInstance, swapChain->GetJavaObject());
 }

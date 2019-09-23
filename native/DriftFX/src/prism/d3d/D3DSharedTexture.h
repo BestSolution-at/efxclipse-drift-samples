@@ -61,7 +61,7 @@ public:
 	static SharedTextureFactoryId registered;
 	static SharedTextureFactoryId registerPrism;
 
-	static int OnTextureCreated(PrismBridge* bridge, Frame* frame, jobject fxTexture);
+	static int OnTextureCreated(PrismBridge* bridge, ShareData* shareData, jobject fxTexture);
 
 protected:
 	D3D9ExContext* d3dContext;

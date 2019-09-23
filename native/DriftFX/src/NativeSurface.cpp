@@ -28,6 +28,9 @@
 
 #include <TransferModeManager.h>
 
+#include "SharedTextureSwapChain.h"
+
+
 
 using namespace std;
 
@@ -101,11 +104,23 @@ void NativeSurface::Cleanup() {
 
 }
 
+SwapChain * driftfx::internal::NativeSurface::CreateSwapChain(math::Vec2ui size, unsigned int imageCount, TransferMode* transferMode, PresentationHint hint, PresentationMode mode)
+{
+	LogInfo("CreateSwapChain " << imageCount);
+	auto transferModeImpl = dynamic_cast<TransferModeImpl*>(transferMode);
+	auto swapChain = new SharedTextureSwapChain(this, size, imageCount, transferModeImpl, hint, mode);
+	std::cout << "created swapChain: " << swapChain << std::endl;
+	api->SetSwapChain(swapChain);
+
+	return dynamic_cast<SwapChain*>(swapChain);
+}
+
 GLContext* NativeSurface::GetContext() {
 	return context;
 }
 
 void NativeSurface::UpdateSurface(Vec2d size, Vec2d screenScale, Vec2d userScale, unsigned int transferMode) {
+	LogDebug("UpdateSurface(" << size.x << ", " << screenScale.x << ", " << userScale.x << ", " << transferMode << ")");
 	SurfaceData newSurfaceData;
 	newSurfaceData.size = size;
 	newSurfaceData.screenScale = screenScale;
@@ -153,6 +168,10 @@ RenderTarget* NativeSurface::Acquire(unsigned int width, unsigned int height, dr
 	auto copy = data;
 	copy.transferMode = transferMode->Id();
 	return Acquire(Vec2ui(width, height), copy);
+}
+
+SurfaceData NativeSurface::GetSurfaceData() {
+	return surfaceData.load();
 }
 
 RenderTarget* NativeSurface::Acquire(math::Vec2ui size, SurfaceData surfaceData) {
@@ -262,13 +281,8 @@ void NativeSurface::Present(RenderTarget* target, PresentationHint hint) {
 }
 
 driftfx::TransferMode* NativeSurface::GetTransferMode() {
-	return nullptr;
+	return TransferModeManager::Instance()->GetTransferMode(GetSurfaceData().transferMode);
 }
-
-void NativeSurface::SetTransferMode(driftfx::TransferMode* transferMode) {
-
-}
-
 
 Context* NativeSurface::GetFxContext() {
 	return PrismBridge::Get()->GetFxContext();

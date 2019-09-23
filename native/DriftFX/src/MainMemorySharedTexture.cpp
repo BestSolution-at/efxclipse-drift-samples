@@ -51,6 +51,7 @@ MainMemorySharedTexture::~MainMemorySharedTexture() {
 
 ShareData* MainMemorySharedTexture::CreateShareData() {
 	MainMemoryShareData* data = new MainMemoryShareData();
+	data->size = size;
 	data->pointer = pointer;
 	data->length = memSize;
 	return data;

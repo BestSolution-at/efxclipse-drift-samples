@@ -71,15 +71,16 @@ void PrismBridge::EnsurePrismContext() {
 	// NOOP here
 }
 
-int PrismBridge::OnTextureCreated(Frame* frame, jobject fxTexture) {
+int PrismBridge::OnTextureCreated(ShareData* shareData, jobject fxTexture) {
 	EnsurePrismContext();
-	auto modeId = frame->GetSurfaceData().transferMode;
+	auto modeId = shareData->transferMode;
 	auto mode = TransferModeManager::Instance()->GetTransferMode(modeId);
 	if (mode == nullptr) {
 		LogError("TransferMode not available " << modeId);
 		return 0;
 	}
 	else {
-		return mode->OnTextureCreated(this, frame, fxTexture);
+		LogInfo("Using TransferMode " << mode->Name());
+		return mode->OnTextureCreated(this, shareData, fxTexture);
 	}
 }

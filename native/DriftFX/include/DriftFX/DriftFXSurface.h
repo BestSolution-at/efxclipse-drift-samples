@@ -12,6 +12,7 @@
 #define DRIFTFX_DRIFTFXSURFACE_H_
 
 #include <list>
+#include <chrono>
 
 #include <DriftFX/Common.h>
 #include <DriftFX/RenderTarget.h>
@@ -23,6 +24,7 @@
 
 namespace driftfx {
 
+	
 enum DRIFT_API PresentationHint {
 	CENTER,
 	COVER,
@@ -36,6 +38,24 @@ enum DRIFT_API PresentationHint {
 	BOTTOM_CENTER,
 	BOTTOM_RIGHT
 };
+
+enum DRIFT_API PresentationMode {
+	FIFO,
+	MAILBOX
+};
+
+class DRIFT_API SwapChain {
+public:
+
+	// blocking call until a RenderTarget is available
+	virtual RenderTarget* Acquire() = 0;
+
+	// non blocking call
+	virtual bool TryAcquire(RenderTarget** renderTarget) = 0;
+
+	virtual void Present(RenderTarget* target) = 0;
+};
+
 
 class DRIFT_API DriftFXSurface {
 
@@ -54,11 +74,26 @@ public:
 	 */
 	virtual void Cleanup() = 0;
 
+
+	/*
+	 * Returns the current transferMode which is set by the java side.
+	 */
+	virtual TransferMode* GetTransferMode() = 0;
+
+	/*
+	 * Creates a new swapchain. The current swap chain - if there is any will become invalid
+	 * when create is invoked.
+	*/
+	virtual SwapChain* CreateSwapChain(math::Vec2ui size, unsigned int imageCount, TransferMode* transferMode, PresentationHint hint, PresentationMode mode) = 0;
+
+
 	/*
 	 * Acquires a RenderTarget with the current width / height.
 	 * delegates to Acquire(GetWidth(), GetHeight()).
 	 */
+	[[deprecated("use SwapChain")]]
 	virtual RenderTarget* Acquire() = 0;
+	[[deprecated("use SwapChain")]]
 	virtual RenderTarget* Acquire(TransferMode* transferMode) = 0;
 
 	/*
@@ -66,10 +101,14 @@ public:
 	 * Should be called from your render thread.
 	 *
 	 */
+	[[deprecated("use SwapChain")]]
 	virtual RenderTarget* Acquire(unsigned int width, unsigned int height) = 0;
+	[[deprecated("use SwapChain")]]
 	virtual RenderTarget* Acquire(unsigned int width, unsigned int height, TransferMode* transferMode) = 0;
 
+	[[deprecated("use SwapChain")]]
 	virtual RenderTarget* Acquire(math::Vec2ui size) = 0;
+	[[deprecated("use SwapChain")]]
 	virtual RenderTarget* Acquire(math::Vec2ui size, TransferMode* transferMode) = 0;
 
 	/*
@@ -77,6 +116,7 @@ public:
 	 * Should be called from your render thread.
 	 *
 	 */
+	[[deprecated("use SwapChain")]]
 	virtual void Present(RenderTarget* target, PresentationHint hint) = 0;
 
 

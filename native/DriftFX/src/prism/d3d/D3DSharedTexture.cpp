@@ -143,20 +143,29 @@ D3DSharedTexture::~D3DSharedTexture() {
 
 ShareData* D3DSharedTexture::CreateShareData() {
 	WDDMShareData* frameData = new WDDMShareData();
+	frameData->size = size;
 	frameData->shareHandle = d3dTexture->GetShareHandle();
 	return frameData;
 }
 
 void D3DSharedTexture::Allocate() {
 	d3dTexture = new D3D9Texture(d3dContext, size.x, size.y);
+	LogInfo("created d3d texture " << d3dTexture);
 	glTexture = new GLTexture(glContext, size.x, size.y);
 
 	hDevice = OpenSharedDevice(d3dContext, glContext);
 	WERR(wglDXSetResourceShareHandleNV(d3dTexture->GetTexture(), d3dTexture->GetShareHandle()); );
+
 	WERR(hObject = wglDXRegisterObjectNV(hDevice, d3dTexture->GetTexture(), glTexture->Name(), GL_TEXTURE_2D, WGL_ACCESS_READ_WRITE_NV); );
+
+	// TODO it seems to work if we keep the object locked 
+	WERR( wglDXLockObjectsNV(hDevice, 1, &hObject); );
 }
 
 void D3DSharedTexture::Release() {
+	// TODO it seems to work if we keep the object locked 
+	WERR( wglDXUnlockObjectsNV(hDevice, 1, &hObject); );
+
 	WERR(wglDXUnregisterObjectNV(hDevice, hObject); );
 	delete glTexture; glTexture = nullptr;
 	CloseSharedDevice(d3dContext, glContext);
@@ -165,26 +174,29 @@ void D3DSharedTexture::Release() {
 }
 
 bool D3DSharedTexture::BeforeRender() {
-	bool success = false;
-	WERR(success = wglDXLockObjectsNV(hDevice, 1, &hObject); );
-	return success;
+	//bool success = false;
+	//WERR( wglDXLockObjectsNV(hDevice, 1, &hObject); );
+	//return success;
+
+	return true;
 }
 
 
 bool D3DSharedTexture::AfterRender() {
-	bool success = false;
-	WERR(success = wglDXUnlockObjectsNV(hDevice, 1, &hObject); );
-	return success;
+	//bool success = false;
+	//WERR( wglDXUnlockObjectsNV(hDevice, 1, &hObject); );
+	//return success;
+
+	return true;
 }
 
 long long D3DSharedTexture::GetShareHandle() {
 	return (long long) d3dTexture->GetShareHandle();
 }
 
-int D3DSharedTexture::OnTextureCreated(PrismBridge* bridge, Frame* frame, jobject fxTexture) {
+int D3DSharedTexture::OnTextureCreated(PrismBridge* bridge, ShareData* shareData, jobject fxTexture) {
 	
-	ShareData* data = frame->GetData();
-	WDDMShareData* wddmData = (WDDMShareData*)data;
+	WDDMShareData* wddmData = (WDDMShareData*)shareData;
 
 	HANDLE shareHandle = wddmData->shareHandle;
 	
@@ -221,7 +233,7 @@ int D3DSharedTexture::OnTextureCreated(PrismBridge* bridge, Frame* frame, jobjec
 
 	WERR(;);
 
-	LogDebug(frame->ToString() << "recreate shared fx texture ( w: " << dec << w << ", h: " << dec << h << ", shareHandle: " << hex << shareHandle << " )")
+	LogDebug("recreate shared fx texture ( w: " << dec << w << ", h: " << dec << h << ", shareHandle: " << hex << shareHandle << " )")
 		HRESULT res = jfxContext->Device()->CreateTexture(
 			w, h,
 			0, D3DUSAGE_DYNAMIC,

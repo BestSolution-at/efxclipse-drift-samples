@@ -45,7 +45,7 @@ public:
 
 	virtual NativeSurface* CreateNativeSurface(long surfaceId, JNINativeSurface* api) = 0;
 
-	virtual int OnTextureCreated(Frame* frame, jobject fxTexture);
+	virtual int OnTextureCreated(ShareData* shareData, jobject fxTexture);
 
 	static void Destroy();
 

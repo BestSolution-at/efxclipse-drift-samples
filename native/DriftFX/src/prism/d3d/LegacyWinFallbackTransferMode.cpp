@@ -39,17 +39,17 @@ namespace prism {
 namespace d3d {
 
 
-class LegacyWinFallbackTransferMode : public TransferMode {
+class LegacyWinFallbackTransferMode : public TransferModeImpl {
 public:
 	SharedTexture* CreateSharedTexture(GLContext* glContext, Context* fxContext, math::Vec2ui size) {
     	D3D9ExContext* d3dContext = dynamic_cast<D3D9ExContext*>(fxContext);
 		return new D3DSharedFallbackTexture(glContext, d3dContext, size);
 	}
-	int OnTextureCreated(prism::PrismBridge* bridge, Frame* frame, jobject fxTexture) {
-		return D3DSharedTexture::OnTextureCreated(bridge, frame, fxTexture);
+	int OnTextureCreated(prism::PrismBridge* bridge, ShareData* data, jobject fxTexture) {
+		return D3DSharedTexture::OnTextureCreated(bridge, data, fxTexture);
     }
 protected:
-	LegacyWinFallbackTransferMode() : TransferMode("LegacyWinFallback") {}
+	LegacyWinFallbackTransferMode() : TransferModeImpl("LegacyWinFallback") {}
 	static TransferModeId registered;
 };
 

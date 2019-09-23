@@ -18,7 +18,7 @@ using namespace driftfx::gl;
 using namespace driftfx::math;
 using namespace driftfx::internal;
 
-SharedTexturePool::SharedTexturePool(GLContext* glContext, Context* fxContext, ::driftfx::internal::TransferMode* mode) :
+SharedTexturePool::SharedTexturePool(GLContext* glContext, Context* fxContext, TransferModeImpl* mode) :
 	glContext(glContext),
 	fxContext(fxContext),
 	mode(mode) {

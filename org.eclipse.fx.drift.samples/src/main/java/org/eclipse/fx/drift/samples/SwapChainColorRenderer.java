@@ -8,27 +8,30 @@
  * Contributors:
  *     Christoph Caks <ccaks@bestsolution.at> - initial API and implementation
  *******************************************************************************/
-package org.eclipse.fx.drift.internal;
+package org.eclipse.fx.drift.samples;
 
-import java.util.function.Consumer;
+import org.eclipse.fx.drift.DriftFXSurface;
 
-public class JNINativeSurface {
+public class SwapChainColorRenderer extends ARenderer {
 
-	private Consumer<Frame> framePresenter;
-	private Consumer<SwapChain> swapChainSetter;
-	
-	public JNINativeSurface(Consumer<Frame> framePresenter, Consumer<SwapChain> swapChainSetter) {
-		this.framePresenter = framePresenter;
-		this.swapChainSetter = swapChainSetter;
+	static {
+		System.loadLibrary("samples");
 	}
 	
-	// Important: called from native code
-	public void present(Frame frame) {
-		framePresenter.accept(frame);
+	private DriftFXSurface surface;
+	
+	public SwapChainColorRenderer(DriftFXSurface surface) {
+		this.surface = surface;
 	}
 	
-	public void setSwapChain(SwapChain swapChain) {
-		swapChainSetter.accept(swapChain);
+	public long getNativeSurfaceId() {
+		return surface.getNativeSurfaceHandle();
+	}
+	
+	private native void nRun(SwapChainColorRenderer renderer);
+	
+	protected void run() {
+		nRun(this);
 	}
 	
 }

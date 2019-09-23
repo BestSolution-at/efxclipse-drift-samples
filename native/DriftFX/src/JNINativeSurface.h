@@ -17,6 +17,7 @@ namespace driftfx {
 namespace internal {
 
 	class Frame;
+	class SharedTextureSwapChain;
 
 namespace jni {
 
@@ -45,9 +46,11 @@ namespace jni {
 		static void Initialize(JNIEnv* env);
 		static void Dispose(JNIEnv* env);
 		static void Present(JNIEnv* env, jobject nativeSurface, jobject frame);
+		static void SetSwapChain(JNIEnv* env, jobject nativeSurface, jobject swapChain);
 	private:
 		static jclass cls;
 		static jmethodID present;
+		static jmethodID setSwapChain;
 	};
 
 }
@@ -59,6 +62,8 @@ public:
 	virtual ~JNINativeSurface();
 
 	void Present(Frame* frame);
+
+	void SetSwapChain(SharedTextureSwapChain* swapChain);
 
 	static void Initialize();
 	static void Dispose();

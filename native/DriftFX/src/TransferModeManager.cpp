@@ -5,32 +5,38 @@
 
 using namespace driftfx::internal;
 
-TransferMode::~TransferMode() {
+TransferModeImpl::~TransferModeImpl() {
 }
 
-TransferMode::TransferMode(std::string name) :
+TransferModeImpl::TransferModeImpl(std::string name) :
 	name(name),
 	id(-1) {
 	
 }
 
-TransferModeId TransferMode::Id() {
+ShareData* TransferModeImpl::CreateShareData(SharedTexture* texture) {
+	ShareData* data = texture->CreateShareData();
+	data->transferMode = Id();
+	return data;
+}
+
+TransferModeId TransferModeImpl::Id() {
 	return id;
 }
 
-void TransferMode::SetId(TransferModeId id) {
+void TransferModeImpl::SetId(TransferModeId id) {
 	this->id = id;
 }
 
-bool TransferMode::isFallback() {
+bool TransferModeImpl::isFallback() {
 	return false;
 }
 
-bool TransferMode::isPlatformDefault() {
+bool TransferModeImpl::isPlatformDefault() {
 	return false;
 }
 
-std::string TransferMode::Name() {
+std::string TransferModeImpl::Name() {
 	return name;
 }
 
@@ -47,8 +53,8 @@ TransferModeManager::~TransferModeManager() {
 
 }
 
-TransferMode* TransferModeManager::GetPlatformDefault() {
-	std::map<TransferModeId, TransferMode*>::iterator it = transferModes.begin();
+TransferModeImpl* TransferModeManager::GetPlatformDefault() {
+	std::map<TransferModeId, TransferModeImpl*>::iterator it = transferModes.begin();
 
 	while (it != transferModes.end()) {
 		auto mode = it->second;
@@ -61,8 +67,8 @@ TransferMode* TransferModeManager::GetPlatformDefault() {
 	return nullptr;
 }
 
-TransferMode* TransferModeManager::GetFallback() {
-	std::map<TransferModeId, TransferMode*>::iterator it = transferModes.begin();
+TransferModeImpl* TransferModeManager::GetFallback() {
+	std::map<TransferModeId, TransferModeImpl*>::iterator it = transferModes.begin();
 
 	while (it != transferModes.end()) {
 		auto mode = it->second;
@@ -82,7 +88,7 @@ TransferModeManager* TransferModeManager::Instance() {
 	return instance;
 }
 
-TransferModeId TransferModeManager::RegisterTransferMode(TransferMode* transferMode) {
+TransferModeId TransferModeManager::RegisterTransferMode(TransferModeImpl* transferMode) {
 	TransferModeId id = nextId++;
 	LogInfo("Registering TransferMode Instance '" << transferMode->Name() << "' as " << id);
 	transferModes[id] = transferMode;
@@ -90,15 +96,15 @@ TransferModeId TransferModeManager::RegisterTransferMode(TransferMode* transferM
 	return id;
 }
 
-TransferMode* TransferModeManager::GetTransferMode(TransferModeId id)
+TransferModeImpl* TransferModeManager::GetTransferMode(TransferModeId id)
 {
 	return transferModes[id];
 }
 
 
-std::list<TransferMode*> TransferModeManager::GetAvailableModes() {
-	std::list<TransferMode*> result;
-	for (std::map<TransferModeId, TransferMode*>::iterator it = transferModes.begin(); it != transferModes.end(); it++) {
+std::list<TransferModeImpl*> TransferModeManager::GetAvailableModes() {
+	std::list<TransferModeImpl*> result;
+	for (std::map<TransferModeId, TransferModeImpl*>::iterator it = transferModes.begin(); it != transferModes.end(); it++) {
 		result.push_back(it->second);
 	}
 	return result;

@@ -51,6 +51,8 @@ public:
 	 */
 	virtual void Cleanup();
 
+	virtual SwapChain* CreateSwapChain(math::Vec2ui size, unsigned int imageCount, TransferMode* transferMode, PresentationHint hint, PresentationMode mode);
+
 
 	virtual RenderTarget* Acquire();
 	virtual RenderTarget* Acquire(driftfx::TransferMode* transferMode);
@@ -64,7 +66,6 @@ public:
 	virtual RenderTarget* Acquire(math::Vec2ui size, SurfaceData surfaceData);
 
 	virtual driftfx::TransferMode* GetTransferMode();
-	virtual void SetTransferMode(driftfx::TransferMode* transferMode);
 
 	/*
 	 * Presents a previously acquired RenderTarget.
@@ -85,6 +86,8 @@ public:
 	 */
 	unsigned int GetHeight();
 
+
+	virtual SurfaceData GetSurfaceData();
 	
 	math::Vec2d GetSurfaceSize();
 	math::Vec2d GetScreenScale();

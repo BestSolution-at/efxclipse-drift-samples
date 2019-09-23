@@ -23,7 +23,7 @@ DriftFXSurface::~DriftFXSurface() {
 
 std::list<TransferMode*> DriftFXSurface::GetAvailableTransferModes() {
 	std::list<TransferMode*> result;
-	std::list<internal::TransferMode*> modes = internal::TransferModeManager::Instance()->GetAvailableModes();
+	std::list<internal::TransferModeImpl*> modes = internal::TransferModeManager::Instance()->GetAvailableModes();
 	for (auto it = modes.begin(); it != modes.end(); it++) {
 		result.push_back(*it);
 	}

@@ -90,7 +90,14 @@ set(DriftFX-Sources
 	src/jni/JNITiming.cpp
 	
 	src/FrameNativeAPI.cpp
+	
+	src/jni/JNISwapChain.h
+	src/jni/JNISwapChain.cpp
+	
+	src/SharedTextureSwapChain.h
+	src/SharedTextureSwapChain.cpp
 )
+list(APPEND DriftFX-Sources ${DriftFX-Headers})
 
 if (WIN32)
 	list(APPEND DriftFX-Sources src/gl/wgl/WGLGLContext.h)

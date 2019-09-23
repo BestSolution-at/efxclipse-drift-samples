@@ -37,7 +37,8 @@ NoopSharedTexture::~NoopSharedTexture() {
 }
 
 ShareData* NoopSharedTexture::CreateShareData() {
-	return nullptr;
+	ShareData* data = new ShareData();
+	return data;
 }
 
 void NoopSharedTexture::Allocate() {

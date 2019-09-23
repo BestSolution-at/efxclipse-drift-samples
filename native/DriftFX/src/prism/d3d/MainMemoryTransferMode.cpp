@@ -33,20 +33,17 @@ namespace internal {
 namespace prism {
 namespace d3d {
 
-class MainMemoryTransferMode : public TransferMode {
+class MainMemoryTransferMode : public TransferModeImpl {
 public:
 	SharedTexture* CreateSharedTexture(GLContext* glContext, Context* fxContext, math::Vec2ui size) {
 		return new MainMemorySharedTexture(glContext, size);
 	}
-	int OnTextureCreated(prism::PrismBridge* bridge, Frame* frame, jobject fxTexture) {
-				LogDebug("OnTextureCreated(" << bridge << ", " << frame << ", " << fxTexture << ")");
+	int OnTextureCreated(prism::PrismBridge* bridge, ShareData* shareData, jobject fxTexture) {
+				LogDebug("OnTextureCreated(" << bridge << ", " << shareData << ", " << fxTexture << ")");
 
-		ShareData* data = frame->GetData();
-		MainMemoryShareData* mmdata = (MainMemoryShareData*)data;
-
+		MainMemoryShareData* mmdata = (MainMemoryShareData*)shareData;
 
 		auto pixels = (byte*) mmdata->pointer;
-
 		D3DPrismBridge* d3dBridge = dynamic_cast<D3DPrismBridge*>(bridge);
 
 		void* resourceHandle = d3dBridge->GetD3DResourceHandle(fxTexture);
@@ -56,7 +53,7 @@ public:
 	
 		
 		// upload to D3D texture
-		auto size = frame->GetSize();
+		auto size = shareData->size;
 		
 		D3DLOCKED_RECT tmp;
 		auto start = std::chrono::steady_clock::now();
@@ -88,7 +85,7 @@ public:
 		return true;
 	}
 protected:
-	MainMemoryTransferMode() : TransferMode("MainMemory") {}
+	MainMemoryTransferMode() : TransferModeImpl("MainMemory") {}
 	static TransferModeId registered;
 };
 

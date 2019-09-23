@@ -49,7 +49,7 @@ typedef std::map<SharedTexture*, std::chrono::steady_clock::time_point> LastUsed
 class SharedTexturePool {
 
 public:
-	SharedTexturePool(GLContext* glContext, Context* fxContext, ::driftfx::internal::TransferMode* mode);
+	SharedTexturePool(GLContext* glContext, Context* fxContext, ::driftfx::internal::TransferModeImpl* mode);
 	virtual ~SharedTexturePool();
 
 	virtual SharedTexture* AcquireTexture(math::Vec2ui size);
@@ -67,7 +67,7 @@ private:
 
 	GLContext* glContext;
 	Context* fxContext;
-	::driftfx::internal::TransferMode* mode;
+	::driftfx::internal::TransferModeImpl* mode;
 };
 
 }

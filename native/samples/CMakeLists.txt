@@ -6,6 +6,7 @@ include_directories(${DRIFTFX_INCLUDE_DIRS})
 
 list(APPEND SourcesList SimpleColorRenderer)
 list(APPEND SourcesList SimpleTriangleRenderer)
+list(APPEND SourcesList SwapChainColorRenderer)
 
 # we're building a library
 add_library(samples SHARED ${SourcesList} $<TARGET_OBJECTS:lib-glew-obj> $<TARGET_OBJECTS:lib-utils-obj>)

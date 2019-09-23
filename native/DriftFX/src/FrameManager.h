@@ -37,6 +37,8 @@ class SharedTexture;
 class ShareData {
 public:
 	unsigned int type;
+	TransferModeId transferMode;
+	math::Vec2ui size;
 };
 
 struct Timing {

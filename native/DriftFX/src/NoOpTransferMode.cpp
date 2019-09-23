@@ -17,17 +17,17 @@
 namespace driftfx {
 namespace internal {
 
-class NoOpTransferMode : public TransferMode {
+class NoOpTransferMode : public TransferModeImpl {
 
 public:
 	SharedTexture* CreateSharedTexture(GLContext* glContext, Context* fxContext, math::Vec2ui size) {
 		return new NoopSharedTexture(glContext, size);
 	}
-	int OnTextureCreated(prism::PrismBridge* bridge, Frame* frame, jobject fxTexture) {
+	int OnTextureCreated(prism::PrismBridge* bridge, ShareData* frame, jobject fxTexture) {
 		return 0;
 	}
 protected:
-	NoOpTransferMode() : TransferMode("NoOp") {}
+	NoOpTransferMode() : TransferModeImpl("NoOp") {}
 	static TransferModeId registered;
 };
 

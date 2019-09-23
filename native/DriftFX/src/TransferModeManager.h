@@ -32,20 +32,21 @@ namespace internal {
 
 	typedef unsigned int TransferModeId;
 
-	class TransferMode : public ::driftfx::TransferMode {
+	class TransferModeImpl : public ::driftfx::TransferMode {
 	public:
-		virtual ~TransferMode();
+		virtual ~TransferModeImpl();
 		std::string Name();
 		TransferModeId Id();
+		virtual ShareData* CreateShareData(SharedTexture* texture);
 		virtual SharedTexture* CreateSharedTexture(GLContext*, Context*, math::Vec2ui size) = 0;
-		virtual int OnTextureCreated(prism::PrismBridge*, Frame*, jobject) = 0;
+		virtual int OnTextureCreated(prism::PrismBridge*, ShareData*, jobject) = 0;
 		virtual bool isPlatformDefault();
 		virtual bool isFallback();
 
 		// this method is internal, it is set by TransferModeManager
 		void SetId(TransferModeId id);
 	protected:
-		TransferMode(std::string name);
+		TransferModeImpl(std::string name);
 	private:
 		std::string name;
 		TransferModeId id;
@@ -58,19 +59,19 @@ namespace internal {
 
 		static TransferModeManager* Instance();
 
-		TransferModeId RegisterTransferMode(TransferMode* mode);
-		TransferMode* GetTransferMode(TransferModeId id);
+		TransferModeId RegisterTransferMode(TransferModeImpl* mode);
+		TransferModeImpl* GetTransferMode(TransferModeId id);
 
-		TransferMode* GetPlatformDefault();
-		TransferMode* GetFallback();
+		TransferModeImpl* GetPlatformDefault();
+		TransferModeImpl* GetFallback();
 
-		std::list<TransferMode*> GetAvailableModes();
+		std::list<TransferModeImpl*> GetAvailableModes();
 
 	private:
 		TransferModeManager();
 		virtual ~TransferModeManager();
 
-		std::map<TransferModeId, TransferMode*> transferModes;
+		std::map<TransferModeId, TransferModeImpl*> transferModes;
 		TransferModeId nextId;
 
 		static TransferModeManager* instance;

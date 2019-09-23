@@ -86,7 +86,7 @@ void Log(LogLevel level, std::string file, int line, std::string func, std::stri
 	std::string fname = filename(file);
 	std::ostringstream os;
 	os << "[C] [" << std::setw(5) << level << "] " << std::setw(40) << std::right << cut(fname, 40) << ":" << std::dec << std::setw(3) << line << " - " << std::setw(100) << std::left << cut(func, 100) << " " << message;
-	std::cout << os.str();
+	std::cout << os.str() << std::flush;
 }
 
 
