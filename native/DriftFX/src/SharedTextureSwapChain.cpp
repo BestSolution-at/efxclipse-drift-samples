@@ -13,11 +13,14 @@
 
 #include "jni/JNISwapChain.h"
 
-#include "utils/JNIHelper.h"
-#include "utils/Logger.h"
 
 #include "prism/PrismBridge.h"
 
+#include <vector>
+#include <algorithm>
+
+#include "utils/JNIHelper.h"
+#include "utils/Logger.h"
 
 using namespace driftfx;
 using namespace internal;
@@ -196,6 +199,11 @@ void SharedTextureSwapChain::Release(RenderTarget* target) {
 	LogDebug("Release " << image->Number());
 	//std::cout << "Nfo: Releasing " << image << std::endl;
 	std::unique_lock<std::mutex> lock(imageMutex);
+	auto begin = images.begin();
+	auto end = images.end();
+	auto found = std::find(begin, end, image);
+	auto isFound = found != end;
+
 	if (std::find(images.begin(), images.end(), image) != images.end()) {
 		freeImages.push(image);
 		imageReleased.notify_one();

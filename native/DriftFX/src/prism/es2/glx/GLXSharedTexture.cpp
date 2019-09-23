@@ -43,6 +43,7 @@ GLXSharedTexture::~GLXSharedTexture() {
 
 ShareData* GLXSharedTexture::CreateShareData() {
 	GLXShareData* data = new GLXShareData();
+	data->size = size;
 	data->textureName = glTexture->Name();
 	return data;
 }

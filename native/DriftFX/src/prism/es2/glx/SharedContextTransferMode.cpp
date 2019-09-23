@@ -33,51 +33,56 @@ namespace prism {
 namespace es2 {
 namespace glx {
 	
-class SharedContextTransferMode : public TransferMode {
+class SharedContextTransferMode : public TransferModeImpl {
 	public:
 	SharedTexture* CreateSharedTexture(GLContext* glContext, Context* fxContext, math::Vec2ui size) {
 		GLContext* fxGlContext = dynamic_cast<GLContext*>(fxContext);
 		return new GLXSharedTexture(glContext, fxGlContext, size);
 	}
-	int OnTextureCreated(prism::PrismBridge* bridge, Frame* frame, jobject fxTexture) {
-		frame->Begin("SharedContextTransferMode#OnTextureCreated");
-		LogDebug("OnTextureCreated " << bridge << ", " << frame << ", " << fxTexture);
+	ShareData* CreateShareData(SharedTexture* texture) {
+		ShareData* data = texture->CreateShareData();
+		data->transferMode = Id();
+		return data;
+	}
+	int OnTextureCreated(prism::PrismBridge* bridge, ShareData* shareData, jobject fxTexture) {
+		LogDebug("OnTextureCreated " << bridge << ", " << shareData << ", " << fxTexture);
 
-			ES2PrismBridge* es2Bridge = dynamic_cast<ES2PrismBridge*>(bridge);
-			ShareData* data = frame->GetData();
-			GLXShareData* shareData = (GLXShareData*) data;
-			auto size = frame->GetSize();
-			GLuint targetTex = es2Bridge->GetGLTextureName(fxTexture);
+		ES2PrismBridge* es2Bridge = dynamic_cast<ES2PrismBridge*>(bridge);
+
+		GLXShareData* glxData = (GLXShareData*) shareData;
+		auto size = glxData->size;
+
+		GLuint targetTex = es2Bridge->GetGLTextureName(fxTexture);
 //			ES2PrismBridge::CopyTexture(shareData->textureName, targetTex, size.x, size.y);
 
-			GLuint width = size.x;
-			GLuint height = size.y;
-			GLuint sourceTex = shareData->textureName;
+		GLuint width = size.x;
+		GLuint height = size.y;
+		GLuint sourceTex = glxData->textureName;
 
-			// COPY OVER
-			GLuint fbos[2];
+		// COPY OVER
+		GLuint fbos[2];
 
-			GLCALL( glGenFramebuffers(2, &fbos[0]) );
+		GLCALL( glGenFramebuffers(2, &fbos[0]) );
 
-			GLCALL( glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[0]) );
-			GLCALL( glFramebufferTexture(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sourceTex, 0) );
+		GLCALL( glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[0]) );
+		GLCALL( glFramebufferTexture(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sourceTex, 0) );
 
-			GLCALL( glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbos[1]); );
-			GLCALL( glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, targetTex, 0) );
+		GLCALL( glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbos[1]); );
+		GLCALL( glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, targetTex, 0) );
 
-			GLCALL( glClearColor(0, 0, 0, 0) );
-			GLCALL( glClear(GL_COLOR_BUFFER_BIT) );
+		GLCALL( glClearColor(0, 0, 0, 0) );
+		GLCALL( glClear(GL_COLOR_BUFFER_BIT) );
 
-			GLCALL( glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR) );
-
-
-			GLCALL( glFlush() );
-
-			GLCALL( glDeleteFramebuffers(2, &fbos[0]) );
+		GLCALL( glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR) );
 
 
-			// We need to wait here for the blit operation to finish to prevent copying an empty texture in FX context
-			//GLCALL( glFinish() );
+		GLCALL( glFlush() );
+
+		GLCALL( glDeleteFramebuffers(2, &fbos[0]) );
+
+
+		// We need to wait here for the blit operation to finish to prevent copying an empty texture in FX context
+		//GLCALL( glFinish() );
 //			GLsync fence;
 //			GLCALL( fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0) );
 //			GLCALL( glFlush() );
@@ -85,14 +90,14 @@ class SharedContextTransferMode : public TransferMode {
 //			GLCALL( glDeleteSync( fence ) );
 
 
-			frame->End("SharedContextTransferMode#OnTextureCreated");
-			return 0;
+
+		return 0;
 	}
 	virtual bool isPlatformDefault() {
 		return true;
 	}
 	protected:
-	SharedContextTransferMode() : TransferMode("SharedContext") {}
+	SharedContextTransferMode() : TransferModeImpl("SharedContext") {}
 	static TransferModeId registered;
 };
 

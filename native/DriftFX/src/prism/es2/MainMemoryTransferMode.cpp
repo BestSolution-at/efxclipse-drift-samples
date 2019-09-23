@@ -18,42 +18,36 @@ namespace es2 {
 using namespace std::placeholders;
 
 
-class MainMemoryTransferMode : TransferMode {
+class MainMemoryTransferMode : TransferModeImpl {
 public:
 	SharedTexture* CreateSharedTexture(GLContext* glContext, Context* fxContext, math::Vec2ui size) {
     	return new MainMemorySharedTexture(glContext, size);
 	}
-	int OnTextureCreated(prism::PrismBridge* bridge, Frame* frame, jobject fxTexture) {
-		frame->Begin("MainMemoryTransferMode#OnTextureCreated");
+	ShareData* CreateShareData(SharedTexture* texture) {
+		ShareData* data = texture->CreateShareData();
+		data->transferMode = Id();
+		return data;
+	}
+	int OnTextureCreated(prism::PrismBridge* bridge, ShareData* shareData, jobject fxTexture) {
 		//LogDebug("OnTextureCreated(" << bridge << ", " << frame << ", " << fxTexture << ")");
 
+		MainMemoryShareData* memData = (MainMemoryShareData*)shareData;
 		ES2PrismBridge* es2Bridge = dynamic_cast<ES2PrismBridge*>(bridge);
-
-		//LogDebug("Context is " << es2Bridge->GetFXSharedGLContext());
 
 		// context is important
 		es2Bridge->GetFXSharedGLContext()->SetCurrent();
 
-
 		GLuint targetTex = es2Bridge->GetGLTextureName(fxTexture);
-		auto t = frame->GetSharedTexture();
-		if (t == nullptr) {
-			return -1;
-		}
 
-		ShareData* data = frame->GetData();
-		MainMemoryShareData* memData = (MainMemoryShareData*) data;
+		es2Bridge->UploadTexture(targetTex, memData->size.x, memData->size.y, memData->pointer, memData->length);
 
-		es2Bridge->UploadTexture(targetTex, frame->GetWidth(), frame->GetHeight(), memData->pointer, memData->length);
-
-		frame->End("MainMemoryTransferMode#OnTextureCreated");
 		return 0;
     }
 	virtual bool isFallback() {
 		return true;
 	}
 protected:
-	MainMemoryTransferMode() : TransferMode("MainMemory") {}
+	MainMemoryTransferMode() : TransferModeImpl("MainMemory") {}
 	static TransferModeId registered;
 };
 

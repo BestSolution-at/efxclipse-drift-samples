@@ -16,6 +16,7 @@
 #include <vector>
 #include <queue>
 #include <mutex>
+#include <condition_variable>
 
 #include <DriftFX/DriftFXSurface.h>
 
@@ -24,6 +25,8 @@
 
 namespace driftfx {
 namespace internal {
+
+class SharedTextureSwapChain;
 
 class SwapChainImage : public driftfx::RenderTarget {
 public:
