@@ -120,7 +120,7 @@ void ES2PrismBridge::UploadTexture(int targetTex, int width, int height, void* m
 	auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - begin);
 	LogDebug( "upload frame needed " << duration.count() << "ns" );
 
-	FenceSyncWait();
+	//FenceSyncWait();
 }
 
 

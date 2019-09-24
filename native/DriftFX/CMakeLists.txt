@@ -22,6 +22,11 @@ set(DriftFX-Headers
 
 # list each source file individually
 set(DriftFX-Sources
+
+	src/ng/GL.cpp
+	src/ng/SYS.cpp
+	src/ng/GLContext.cpp
+
 	src/SurfaceData.h
 	
     src/Context.cpp

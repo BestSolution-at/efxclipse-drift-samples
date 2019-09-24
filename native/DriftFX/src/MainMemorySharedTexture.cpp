@@ -9,7 +9,6 @@
  *     Christoph Caks <ccaks@bestsolution.at> - initial API and implementation
  */
 
-#include <chrono>
 
 #include "MainMemorySharedTexture.h"
 
@@ -23,9 +22,11 @@
 
 #include <utils/Logger.h>
 
-#include <iostream>
 
 #include <memory.h>
+
+#include <chrono>
+#include <iostream>
 
 using namespace std;
 
