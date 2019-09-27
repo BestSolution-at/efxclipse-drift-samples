@@ -25,7 +25,11 @@ set(DriftFX-Sources
 
 	src/ng/GL.cpp
 	src/ng/SYS.cpp
-	src/ng/GLContext.cpp
+	
+	src/ng/gl_context.h
+	#src/ng/gl_context_glx.cpp
+	src/ng/gl_context_wgl.cpp
+	src/ng/gl_context_jni.cpp
 
 	src/SurfaceData.h
 	
