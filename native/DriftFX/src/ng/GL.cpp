@@ -13,6 +13,7 @@
 #include <GL/glew.h>
 
 
+
 extern "C" JNIEXPORT void JNICALL Java_org_eclipse_fx_drift_internal_GL_glewInit(JNIEnv *env, jclass cls) {
 	glewInit();
 }

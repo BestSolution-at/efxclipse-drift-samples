@@ -156,7 +156,7 @@ public class SimpleColorSample extends Application {
 			e.printStackTrace();
 		}
 	}
-	static { System.loadLibrary("samples"); }
+	static { System.loadLibrary("driftfx");System.loadLibrary("samples"); }
 	private static native void nRenderFrame(int targetTex);
 
 }

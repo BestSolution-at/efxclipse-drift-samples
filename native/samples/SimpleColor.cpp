@@ -2,7 +2,7 @@
 #include <jni.h>
 #include <GL/glew.h>
 
-#include <GL/glx.h>
+//#include <GL/glx.h>
 
 #include <utils/Logger.h>
 
@@ -48,38 +48,40 @@ float val = 0;
 
 void renderFrame(GLuint textureId) {
 
+	LogInfo("renderFrame glGenFramebuffers " << (void*)glGenFramebuffers);
+
 	GLuint fb;
 	glGenFramebuffers(1, &fb);
-//
-//	if (!glIsFramebuffer(fb)) {
-//		glGenFramebuffers = (PFNGLGENFRAMEBUFFERSPROC) glXGetProcAddress((const GLubyte*)"glGenFramebuffers");
-//
-//		LogInfo("Version: " << glGetString(GL_VERSION));
-//		LogInfo("Vendor: " << glGetString(GL_VENDOR));
-//
-//		void* myaddr = (void*) glXGetProcAddress((const GLubyte*)"glGenFramebuffers");
-//		LogInfo("-> " << myaddr);
-//
-//		GLuint fu = -123;
-//		((void (*) (GLsizei, GLuint*)) myaddr)(1, &fu);
-//		LogInfo("fu = " << fu);
-//		glGenBuffers(1, &fu);
-//		LogInfo("fu = " << fu);
-//		glGenTextures(1, &fu);
-//		LogInfo("fu = " << fu);
-//
-//		LogInfo("INIT " << (void*) glGenFramebuffers)
-//		//glewInit();
-//
-//		GLuint x;
-//		glGenFramebuffers(1, &x);
-//		fb = x;
-//
-//		GLuint what;
-//		glGenFramebuffers(1, &what);
-//		LogInfo("err " << glGetError())
-//		LogInfo("what " << what);
-//	}
+
+	if (!glIsFramebuffer(fb)) {
+		//glGenFramebuffers = (PFNGLGENFRAMEBUFFERSPROC) glXGetProcAddress((const GLubyte*)"glGenFramebuffers");
+
+		//LogInfo("Version: " << glGetString(GL_VERSION));
+		//LogInfo("Vendor: " << glGetString(GL_VENDOR));
+
+		//void* myaddr = (void*) glXGetProcAddress((const GLubyte*)"glGenFramebuffers");
+		//LogInfo("-> " << myaddr);
+
+		//GLuint fu = -123;
+		//((void (*) (GLsizei, GLuint*)) myaddr)(1, &fu);
+		//LogInfo("fu = " << fu);
+		//glGenBuffers(1, &fu);
+		//LogInfo("fu = " << fu);
+		//glGenTextures(1, &fu);
+		//LogInfo("fu = " << fu);
+
+		
+		//glewInit();
+
+		GLuint x;
+		glGenFramebuffers(1, &x);
+		fb = x;
+
+		GLuint what;
+		glGenFramebuffers(1, &what);
+		LogInfo("err " << glGetError())
+		LogInfo("what " << what);
+	}
 	val += 0.01f;
 	if (val > 1) {
 		val -= 1;

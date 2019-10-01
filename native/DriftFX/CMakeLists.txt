@@ -30,6 +30,8 @@ set(DriftFX-Sources
 	#src/ng/gl_context_glx.cpp
 	src/ng/gl_context_wgl.cpp
 	src/ng/gl_context_jni.cpp
+	src/ng/gl_context_procs.h
+	src/ng/gl_context_procs.cpp
 
 	src/SurfaceData.h
 	
@@ -109,6 +111,9 @@ set(DriftFX-Sources
 list(APPEND DriftFX-Sources ${DriftFX-Headers})
 
 if (WIN32)
+
+	list(APPEND DriftFX-Sources src/ng/D3DBatch.cpp)
+
 	list(APPEND DriftFX-Sources src/gl/wgl/WGLGLContext.h)
 	list(APPEND DriftFX-Sources src/gl/wgl/WGLGLContext.cpp)
 	

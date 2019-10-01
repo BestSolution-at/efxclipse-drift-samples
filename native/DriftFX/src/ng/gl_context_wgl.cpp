@@ -46,10 +46,10 @@ namespace gl {
 
 		switch (message) {
 		case WM_KEYDOWN:
-			if (wParam == VK_ESCAPE) {
-				PostQuitMessage(0);
-			}
-			break;
+if (wParam == VK_ESCAPE) {
+	PostQuitMessage(0);
+}
+break;
 		case WM_CLOSE:
 			PostQuitMessage(0);
 			break;
@@ -107,9 +107,9 @@ namespace gl {
 		std::cout << " - hInstance = " << hInstance << std::endl;
 
 		ATOM cls = registerClass(hInstance);
-		
+
 		HWND window = CreateDriftWindow(hInstance);
-		
+
 		std::cout << " - window = " << window << std::endl;
 		HDC hDC = GetDC(window);
 		std::cout << " - hDC = " << hDC << std::endl;
@@ -143,6 +143,17 @@ namespace gl {
 		std::cout << " - made current = " << c << std::endl;
 
 		std::cout << " OpenGL " << glGetString(GL_VERSION) << std::endl;
+
+		std::cout << " looking up function pointers" << std::endl;
+
+		procs::Initialize([](const char* name) {
+			PROC proc = wglGetProcAddress(name);
+			std::cout << " * " << name << ": " << proc << std::endl;
+			return (void*) proc;
+		});
+
+		std::cout << " done." << std::endl;
+
 
 		pfnCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
 		std::cout << " - got function pointer pfnCreateContextAttribsARB = " << pfnCreateContextAttribsARB << std::endl << std::flush;
