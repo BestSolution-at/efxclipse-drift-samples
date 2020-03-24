@@ -30,9 +30,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.TextBoundsType;
 import javafx.stage.Stage;
 
+@SuppressWarnings("restriction")
 public class Demo extends Application {
 
 	Node create() {
@@ -85,7 +85,7 @@ public class Demo extends Application {
 		});
 		stop.setDisable(true);
 
-		Spinner userScale = new Spinner<>();
+		Spinner<Double> userScale = new Spinner<>();
 		userScale.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.1, 2.4, 1.0, 0.1));
 		surface0.userScaleFactorProperty().bind(userScale.valueProperty());
 		

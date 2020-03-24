@@ -2,16 +2,14 @@ package org.eclipse.fx.drift.samples.ng;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.fx.drift.DriftFXSurface;
 import org.eclipse.fx.drift.DriftFXSurface2;
+import org.eclipse.fx.drift.internal.GL;
+import org.eclipse.fx.drift.internal.backend.BackSwapChain;
+import org.eclipse.fx.drift.internal.backend.BackSwapChain.PresentationMode;
 import org.eclipse.fx.drift.internal.backend.Backend;
 import org.eclipse.fx.drift.internal.backend.BackendImpl;
 import org.eclipse.fx.drift.internal.backend.Image;
 import org.eclipse.fx.drift.internal.common.MainMemoryImageData;
-import org.eclipse.fx.drift.internal.GL;
-import org.eclipse.fx.drift.internal.GraphicsPipelineUtil;
-import org.eclipse.fx.drift.internal.backend.BackSwapChain;
-import org.eclipse.fx.drift.internal.backend.BackSwapChain.PresentationMode;
 import org.eclipse.fx.drift.internal.frontend.Frontend;
 import org.eclipse.fx.drift.internal.frontend.FrontendImpl;
 import org.eclipse.fx.drift.internal.math.Vec2i;
@@ -26,6 +24,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+@SuppressWarnings("restriction")
 public class SimpleColorSample extends Application {
 
 	private DriftFXSurface2 surface;
@@ -47,22 +47,16 @@ public class SimpleColorSample extends Application {
 		try {
 			Prism.initialize();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchFieldException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -148,8 +142,6 @@ public class SimpleColorSample extends Application {
 		swapChain = null;
 		
 	}
-	
-	private float anim;
 	
 	private float r, g, b;
 	
