@@ -15,15 +15,17 @@ import org.eclipse.fx.drift.internal.backend.BackSwapChain.PresentationMode;
 import org.eclipse.fx.drift.internal.frontend.Frontend;
 import org.eclipse.fx.drift.internal.frontend.FrontendImpl;
 import org.eclipse.fx.drift.internal.math.Vec2i;
+import org.eclipse.fx.drift.internal.prism.Prism;
 import org.eclipse.fx.drift.internal.transport.VMTransport;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
 public class SimpleColorSample extends Application {
 
 	private DriftFXSurface2 surface;
@@ -43,7 +45,7 @@ public class SimpleColorSample extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		try {
-			GraphicsPipelineUtil.initialize();
+			Prism.initialize();
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -66,6 +68,9 @@ public class SimpleColorSample extends Application {
 		
 		
 		BorderPane root = new BorderPane();
+		
+		BorderPane force = new BorderPane();
+		
 		Scene scene = new Scene(root);
 		
 		surface = new DriftFXSurface2();
@@ -75,8 +80,8 @@ public class SimpleColorSample extends Application {
 		transport = new VMTransport(frontend, backend);
 		transport.start();
 		
-		
-		root.setCenter(surface);
+		force.setCenter(surface);
+		root.setCenter(force);
 		
 		Button start = new Button("start");
 		start.setOnAction(e -> new Thread(this::render).start());
@@ -84,13 +89,30 @@ public class SimpleColorSample extends Application {
 		stop.setOnAction(e -> alive = false);
 		
 		HBox buttons = new HBox(start, stop);
-		root.setBottom(buttons);
+		root.setTop(buttons);
+		
+		Label stats = new Label();
+		stats.textProperty().bind(surface.statsProperty());
+		root.setBottom(stats);
+		
+		
+		Button drei = new Button("3x3");
+		drei.setOnAction(e -> force.setMaxSize(3, 3));
+		Button vier = new Button("4x4");
+		vier.setOnAction(e -> force.setMaxSize(4, 4));
+		Button norm = new Button("norm");
+		norm.setOnAction(e -> force.setMaxSize(Label.USE_PREF_SIZE, Label.USE_PREF_SIZE));
+		
+		VBox right = new VBox(drei, vier, norm);
+		root.setRight(right);
+		
 		
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
 	
 	public static void main(String[] args) {
+		GL.initialize();
 		launch(args);
 	}
 	
@@ -99,19 +121,9 @@ public class SimpleColorSample extends Application {
 	
 	private void render() {
 		
-		ctx = GL.createContext(0);
+		ctx = GL.createContext(0, 3, 2);
 		GL.makeContextCurrent(ctx);
-		
-		GL.glewInit();
-		
-		int mytex = GL.glGenTexture();
-		System.err.println("mytex = " + mytex);
-		GL.glDeleteTexture(mytex);
-		
-		int mybuf = GL.glGenBuffer();
-		System.err.println("mybuf = " + mybuf);
-		GL.glDeleteBuffer(mybuf);
-		
+
 		alive = true;
 		
 		while (alive) {
@@ -139,24 +151,64 @@ public class SimpleColorSample extends Application {
 	
 	private float anim;
 	
+	private float r, g, b;
+	
+	private float val;
+	
+	void interpolate(float d) {
+		r = r0 * d + r1 * (1-d);
+		g = g0 * d + g1 * (1-d);
+		b = b0 * d + b1 * (1-d);
+	}
+	
+	float r0 = 0.f, g0 = 0.5f, b0 = 0.7f;
+	float r1 = 1.f, g1 = 1.f, b1 = 0.0f;
+	
+	private void doRenderFrame(int textureId) {
+		
+		val += 0.01f;
+		if (val > 1) {
+			val -= 1;
+			float tmp = r0; r0 = r1; r1 = tmp;
+			tmp = g0; g0 = g1; g1 = tmp;
+			tmp = b0; b0 = b1; b1 = tmp;
+		}
+		
+		interpolate(val);
+		
+		int fb = GL.glGenFramebuffer();
+		
+		
+		GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, fb);
+		GL.glFramebufferTexture(GL.GL_FRAMEBUFFER, GL.GL_COLOR_ATTACHMENT0, textureId, 0);
+		
+		
+		GL.glClearColor(r, g, b, 1.0f);
+		GL.glClear(GL.GL_COLOR_BUFFER_BIT);
+		
+		
+		GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);
+		GL.glDeleteFramebuffer(fb);
+		
+	}
+	
 	private void renderFrame() {
 		try {
 		Image target = swapChain.acquire();
 		
 		int tex = target.getGLTexture();
 		
-		System.err.println("renderFrame " + tex );
-		nRenderFrame(tex);
+		//System.err.println("renderFrame " + tex );
+		
+		doRenderFrame(tex);
 		
 		swapChain.present(target);
 		
-		Thread.sleep(480);
+		Thread.sleep(16);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	static { System.loadLibrary("driftfx");System.loadLibrary("samples"); }
-	private static native void nRenderFrame(int targetTex);
 
 }
