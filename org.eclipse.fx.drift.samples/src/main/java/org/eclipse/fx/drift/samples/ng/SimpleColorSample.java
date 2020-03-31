@@ -9,7 +9,7 @@ import org.eclipse.fx.drift.internal.backend.BackSwapChain.PresentationMode;
 import org.eclipse.fx.drift.internal.backend.Backend;
 import org.eclipse.fx.drift.internal.backend.BackendImpl;
 import org.eclipse.fx.drift.internal.backend.Image;
-import org.eclipse.fx.drift.internal.common.MainMemoryImageData;
+import org.eclipse.fx.drift.internal.common.NVDXInteropImageData;
 import org.eclipse.fx.drift.internal.frontend.Frontend;
 import org.eclipse.fx.drift.internal.frontend.FrontendImpl;
 import org.eclipse.fx.drift.internal.math.Vec2i;
@@ -126,7 +126,7 @@ public class SimpleColorSample extends Application {
 			
 			if (swapChain == null || size.x != width || size.y != height) {
 				System.err.println("(re)create swapchain");
-				swapChain = backend.createSwapChain(size, 3, PresentationMode.MAILBOX, MainMemoryImageData.TYPE);
+				swapChain = backend.createSwapChain(size, 3, PresentationMode.MAILBOX, NVDXInteropImageData.TYPE);
 				
 				width = size.x;
 				height = size.y;
@@ -173,7 +173,7 @@ public class SimpleColorSample extends Application {
 		
 		GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, fb);
 		GL.glFramebufferTexture(GL.GL_FRAMEBUFFER, GL.GL_COLOR_ATTACHMENT0, textureId, 0);
-		
+	
 		
 		GL.glClearColor(r, g, b, 1.0f);
 		GL.glClear(GL.GL_COLOR_BUFFER_BIT);
