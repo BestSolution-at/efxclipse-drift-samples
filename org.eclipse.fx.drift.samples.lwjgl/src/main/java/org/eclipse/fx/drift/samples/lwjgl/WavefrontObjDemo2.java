@@ -4,63 +4,131 @@
  */
 package org.eclipse.fx.drift.samples.lwjgl;
 
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.PointerBuffer;
-import org.lwjgl.assimp.*;
-import org.lwjgl.glfw.*;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL32;
-import org.lwjgl.opengl.GL32C;
-import org.lwjgl.opengl.GL40;
-import org.lwjgl.opengl.GLCapabilities;
-import org.lwjgl.opengl.GLUtil;
-import org.lwjgl.system.*;
-import org.omg.CORBA.portable.ApplicationException;
+import static org.eclipse.fx.drift.samples.lwjgl.IOUtil.ioResourceToByteBuffer;
+import static org.lwjgl.assimp.Assimp.AI_MATKEY_COLOR_AMBIENT;
+import static org.lwjgl.assimp.Assimp.AI_MATKEY_COLOR_DIFFUSE;
+import static org.lwjgl.assimp.Assimp.AI_MATKEY_COLOR_SPECULAR;
+import static org.lwjgl.assimp.Assimp.aiGetErrorString;
+import static org.lwjgl.assimp.Assimp.aiGetMaterialColor;
+import static org.lwjgl.assimp.Assimp.aiImportFileEx;
+import static org.lwjgl.assimp.Assimp.aiProcess_JoinIdenticalVertices;
+import static org.lwjgl.assimp.Assimp.aiProcess_Triangulate;
+import static org.lwjgl.assimp.Assimp.aiReleaseImport;
+import static org.lwjgl.assimp.Assimp.aiTextureType_NONE;
+import static org.lwjgl.opengl.ARBFragmentShader.GL_FRAGMENT_SHADER_ARB;
+import static org.lwjgl.opengl.ARBShaderObjects.GL_OBJECT_COMPILE_STATUS_ARB;
+import static org.lwjgl.opengl.ARBShaderObjects.GL_OBJECT_LINK_STATUS_ARB;
+import static org.lwjgl.opengl.ARBShaderObjects.glAttachObjectARB;
+import static org.lwjgl.opengl.ARBShaderObjects.glCompileShaderARB;
+import static org.lwjgl.opengl.ARBShaderObjects.glCreateProgramObjectARB;
+import static org.lwjgl.opengl.ARBShaderObjects.glCreateShaderObjectARB;
+import static org.lwjgl.opengl.ARBShaderObjects.glGetInfoLogARB;
+import static org.lwjgl.opengl.ARBShaderObjects.glGetObjectParameteriARB;
+import static org.lwjgl.opengl.ARBShaderObjects.glGetUniformLocationARB;
+import static org.lwjgl.opengl.ARBShaderObjects.glLinkProgramARB;
+import static org.lwjgl.opengl.ARBShaderObjects.glShaderSourceARB;
+import static org.lwjgl.opengl.ARBShaderObjects.glUniform3fvARB;
+import static org.lwjgl.opengl.ARBShaderObjects.glUniformMatrix3fvARB;
+import static org.lwjgl.opengl.ARBShaderObjects.glUniformMatrix4fvARB;
+import static org.lwjgl.opengl.ARBShaderObjects.glUseProgramObjectARB;
+import static org.lwjgl.opengl.ARBShaderObjects.nglUniform3fvARB;
+import static org.lwjgl.opengl.ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB;
+import static org.lwjgl.opengl.ARBVertexBufferObject.GL_ELEMENT_ARRAY_BUFFER_ARB;
+import static org.lwjgl.opengl.ARBVertexBufferObject.GL_STATIC_DRAW_ARB;
+import static org.lwjgl.opengl.ARBVertexBufferObject.glBindBufferARB;
+import static org.lwjgl.opengl.ARBVertexBufferObject.glBufferDataARB;
+import static org.lwjgl.opengl.ARBVertexBufferObject.glGenBuffersARB;
+import static org.lwjgl.opengl.ARBVertexBufferObject.nglBufferDataARB;
+import static org.lwjgl.opengl.ARBVertexShader.GL_VERTEX_SHADER_ARB;
+import static org.lwjgl.opengl.ARBVertexShader.glEnableVertexAttribArrayARB;
+import static org.lwjgl.opengl.ARBVertexShader.glGetAttribLocationARB;
+import static org.lwjgl.opengl.ARBVertexShader.glVertexAttribPointerARB;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_COMPONENT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glDeleteTextures;
+import static org.lwjgl.opengl.GL11.glDrawElements;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glGenTextures;
+import static org.lwjgl.opengl.GL11.glTexImage2D;
+import static org.lwjgl.opengl.GL11.glViewport;
+import static org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0;
+import static org.lwjgl.opengl.GL30.GL_DEPTH_ATTACHMENT;
+import static org.lwjgl.opengl.GL30.GL_DEPTH_COMPONENT32F;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_COMPLETE;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
+import static org.lwjgl.opengl.GL30.glBindFramebuffer;
+import static org.lwjgl.opengl.GL30.glCheckFramebufferStatus;
+import static org.lwjgl.opengl.GL30.glDeleteFramebuffers;
+import static org.lwjgl.opengl.GL30.glGenFramebuffers;
+import static org.lwjgl.opengl.GL32.glFramebufferTexture;
+import static org.lwjgl.system.MemoryUtil.NULL;
+import static org.lwjgl.system.MemoryUtil.memAddress;
+import static org.lwjgl.system.MemoryUtil.memCopy;
+import static org.lwjgl.system.MemoryUtil.memUTF8;
 
-import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.assimp.Assimp.*;
-import static org.eclipse.fx.drift.samples.lwjgl.IOUtil.*;
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.ARBFragmentShader.*;
-import static org.lwjgl.opengl.ARBShaderObjects.*;
-import static org.lwjgl.opengl.ARBVertexBufferObject.*;
-import static org.lwjgl.opengl.ARBVertexShader.*;
-import static org.lwjgl.opengl.GL32.*;
-import static org.lwjgl.system.MemoryUtil.*;
+import org.eclipse.fx.drift.DriftFXSurface;
+import org.eclipse.fx.drift.PresentationMode;
+import org.eclipse.fx.drift.RenderTarget;
+import org.eclipse.fx.drift.Renderer;
+import org.eclipse.fx.drift.StandardTransferTypes;
+import org.eclipse.fx.drift.SwapChain;
+import org.eclipse.fx.drift.Vec2i;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.assimp.AIColor4D;
+import org.lwjgl.assimp.AIFace;
+import org.lwjgl.assimp.AIFile;
+import org.lwjgl.assimp.AIFileCloseProc;
+import org.lwjgl.assimp.AIFileCloseProcI;
+import org.lwjgl.assimp.AIFileIO;
+import org.lwjgl.assimp.AIFileOpenProc;
+import org.lwjgl.assimp.AIFileOpenProcI;
+import org.lwjgl.assimp.AIFileReadProc;
+import org.lwjgl.assimp.AIFileReadProcI;
+import org.lwjgl.assimp.AIFileSeek;
+import org.lwjgl.assimp.AIFileSeekI;
+import org.lwjgl.assimp.AIFileTellProc;
+import org.lwjgl.assimp.AIFileTellProcI;
+import org.lwjgl.assimp.AIMaterial;
+import org.lwjgl.assimp.AIMesh;
+import org.lwjgl.assimp.AIScene;
+import org.lwjgl.assimp.AIVector3D;
+import org.lwjgl.assimp.Assimp;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GLCapabilities;
+import org.lwjgl.opengl.GLUtil;
+import org.lwjgl.system.Callback;
+import org.lwjgl.system.Configuration;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-
-import org.eclipse.fx.drift.DriftFXSurface2;
-import org.eclipse.fx.drift.internal.backend.BackSwapChain;
-import org.eclipse.fx.drift.internal.backend.Backend;
-import org.eclipse.fx.drift.internal.backend.BackendImpl;
-import org.eclipse.fx.drift.internal.backend.Image;
-import org.eclipse.fx.drift.internal.backend.BackSwapChain.PresentationMode;
-import org.eclipse.fx.drift.internal.common.MainMemoryImageData;
-import org.eclipse.fx.drift.internal.common.NVDXInteropImageData;
-import org.eclipse.fx.drift.internal.frontend.Frontend;
-import org.eclipse.fx.drift.internal.frontend.FrontendImpl;
-import org.eclipse.fx.drift.internal.math.Vec2i;
-import org.eclipse.fx.drift.internal.prism.Prism;
-import org.eclipse.fx.drift.internal.transport.VMTransport;
+import javafx.stage.StageStyle;
 
 /**
  * Shows how to load models in Wavefront obj and mlt format with Assimp binding and render them with
@@ -113,35 +181,28 @@ public class WavefrontObjDemo2 extends Application {
     Callback debugProc;
 
     
-    private DriftFXSurface2 surface;
-	
-	private Frontend frontend;
-	private Backend backend;
-	private VMTransport transport;
+    private DriftFXSurface surface;
 	
 	private boolean alive;
 	
-	private BackSwapChain swapChain;
+	private SwapChain swapChain;
+	private Renderer renderer;
     
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		
-		try {
-			Prism.initialize();
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+
+//		primaryStage.initStyle(StageStyle.TRANSPARENT);
 		
 		BorderPane root = new BorderPane();
+		root.setBackground(null);
+		root.setPadding(new Insets(40));
 		root.setPrefSize(1024, 768);
 		Scene scene = new Scene(root);
+		scene.setFill(Color.TRANSPARENT);
 		
-		surface = new DriftFXSurface2();
+		surface = new DriftFXSurface();
 		
-		frontend = new FrontendImpl(surface);
-		backend = new BackendImpl();
-		transport = new VMTransport(frontend, backend);
-		transport.start();
+		renderer = Renderer.getRenderer(surface);
 
 		root.setCenter(surface);
 
@@ -185,115 +246,9 @@ public class WavefrontObjDemo2 extends Application {
 		Configuration.DEBUG_FUNCTIONS.set(false);
 		Configuration.DEBUG_STREAM.set(System.err);
 		
-		org.eclipse.fx.drift.internal.GL.initialize();
+//		org.eclipse.fx.drift.internal.GL.initialize();
 		launch(args);
-		glfwDefaultWindowHints();
 	}
-    
-//    void init() throws IOException {
-//
-//        if (!glfwInit()) {
-//            throw new IllegalStateException("Unable to initialize GLFW");
-//        }
-//
-//        glfwDefaultWindowHints();
-//        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-//        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-//        window = glfwCreateWindow(width, height,
-//                "Wavefront obj model loading with Assimp demo", NULL, NULL);
-//        if (window == NULL)
-//            throw new AssertionError("Failed to create the GLFW window");
-//
-//        System.out.println("Move the mouse to look around");
-//        System.out.println("Zoom in/out with mouse wheel");
-//        glfwSetFramebufferSizeCallback(window, fbCallback = new GLFWFramebufferSizeCallback() {
-//            @Override
-//            public void invoke(long window, int width, int height) {
-//                if (width > 0 && height > 0 && (WavefrontObjDemo2.this.fbWidth != width
-//                        || WavefrontObjDemo2.this.fbHeight != height)) {
-//                    WavefrontObjDemo2.this.fbWidth = width;
-//                    WavefrontObjDemo2.this.fbHeight = height;
-//                }
-//            }
-//        });
-//        glfwSetWindowSizeCallback(window, wsCallback = new GLFWWindowSizeCallback() {
-//            @Override
-//            public void invoke(long window, int width, int height) {
-//                if (width > 0 && height > 0 && (WavefrontObjDemo2.this.width != width
-//                        || WavefrontObjDemo2.this.height != height)) {
-//                    WavefrontObjDemo2.this.width = width;
-//                    WavefrontObjDemo2.this.height = height;
-//                }
-//            }
-//        });
-//        glfwSetKeyCallback(window, keyCallback = new GLFWKeyCallback() {
-//            @Override
-//            public void invoke(long window, int key, int scancode, int action, int mods) {
-//                if (action != GLFW_RELEASE) {
-//                    return;
-//                }
-//                if (key == GLFW_KEY_ESCAPE) {
-//                    glfwSetWindowShouldClose(window, true);
-//                }
-//            }
-//        });
-//        glfwSetCursorPosCallback(window, cpCallback = new GLFWCursorPosCallback() {
-//            @Override
-//            public void invoke(long window, double x, double y) {
-//                rotation = ((float) x / width - 0.5f) * 2f * (float) Math.PI;
-//            }
-//        });
-//        glfwSetScrollCallback(window, sCallback = new GLFWScrollCallback() {
-//            @Override
-//            public void invoke(long window, double xoffset, double yoffset) {
-//                if (yoffset < 0) {
-//                    fov *= 1.05f;
-//                } else {
-//                    fov *= 1f / 1.05f;
-//                }
-//                if (fov < 10.0f) {
-//                    fov = 10.0f;
-//                } else if (fov > 120.0f) {
-//                    fov = 120.0f;
-//                }
-//            }
-//        });
-//
-//        GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-//        glfwSetWindowPos(window, (vidmode.width() - width) / 2, (vidmode.height() - height) / 2);
-//        glfwMakeContextCurrent(window);
-//        glfwSwapInterval(0);
-//        glfwSetCursorPos(window, width / 2, height / 2);
-//
-//        try (MemoryStack frame = MemoryStack.stackPush()) {
-//            IntBuffer framebufferSize = frame.mallocInt(2);
-//            nglfwGetFramebufferSize(window, memAddress(framebufferSize), memAddress(framebufferSize) + 4);
-//            width = framebufferSize.get(0);
-//            height = framebufferSize.get(1);
-//        }
-//
-//        caps = GL.createCapabilities();
-//        if (!caps.GL_ARB_shader_objects) {
-//            throw new AssertionError("This demo requires the ARB_shader_objects extension.");
-//        }
-//        if (!caps.GL_ARB_vertex_shader) {
-//            throw new AssertionError("This demo requires the ARB_vertex_shader extension.");
-//        }
-//        if (!caps.GL_ARB_fragment_shader) {
-//            throw new AssertionError("This demo requires the ARB_fragment_shader extension.");
-//        }
-//        debugProc = GLUtil.setupDebugMessageCallback();
-//
-//        glClearColor(0f, 0f, 0f, 1f);
-//        glEnable(GL_DEPTH_TEST);
-//
-//        /* Create all needed GL resources */
-//        loadModel();
-//        createProgram();
-//
-//        /* Show window */
-//        glfwShowWindow(window);
-//    }
     
     long ctx;
     
@@ -316,7 +271,7 @@ public class WavefrontObjDemo2 extends Application {
         }
         debugProc = GLUtil.setupDebugMessageCallback();
         
-        glClearColor(0.0f, 0f, 0f, 1f);
+        glClearColor(0.0f, 0f, 0f, 0f);
         glEnable(GL_DEPTH_TEST);
 
         /* Create all needed GL resources */
@@ -476,11 +431,14 @@ public class WavefrontObjDemo2 extends Application {
     void loop() {
         while (alive) {
         	
-        	Vec2i size = frontend.getSize();
+        	Vec2i size = renderer.getSize();
 
         	if (swapChain == null || size.x != width || size.y != height) {
 				System.err.println("(re)create swapchain");
-				swapChain = backend.createSwapChain(size, 2, PresentationMode.MAILBOX, NVDXInteropImageData.TYPE);
+				if (swapChain != null) {
+					swapChain.dispose();
+				}
+				swapChain = renderer.createSwapChain(size, 3, PresentationMode.MAILBOX, StandardTransferTypes.MainMemory);
 				
 				width = size.x;
 				height = size.y;
@@ -489,12 +447,9 @@ public class WavefrontObjDemo2 extends Application {
             update();
             
             try {
-	            Image target = swapChain.acquire();
+	            RenderTarget target = swapChain.acquire();
 	    		
 	    		int tex = target.getGLTexture();
-	    		
-	    		boolean isTex = glIsTexture(tex);
-	    		System.err.println("Is Tex: " + isTex);
 	    		int depthTex = glGenTextures();
 	    		glBindTexture(GL_TEXTURE_2D, depthTex);
 	    		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, (ByteBuffer)null);
@@ -528,7 +483,7 @@ public class WavefrontObjDemo2 extends Application {
             }
         }
         
-        swapChain.release();
+        swapChain.dispose();
 		swapChain = null;
     }
 
@@ -543,15 +498,9 @@ public class WavefrontObjDemo2 extends Application {
             }
         } catch (Throwable t) {
             t.printStackTrace();
-        } finally {
-            glfwTerminate();
         }
     }
 
-
-//    public static void main(String[] args) {
-//        new WavefrontObjDemo2().run();
-//    }
 
     static class Model {
 

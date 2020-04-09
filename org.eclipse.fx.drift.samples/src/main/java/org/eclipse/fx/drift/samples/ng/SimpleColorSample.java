@@ -2,17 +2,17 @@ package org.eclipse.fx.drift.samples.ng;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.fx.drift.DriftFXSurface2;
+import org.eclipse.fx.drift.DriftFXSurface;
+import org.eclipse.fx.drift.PresentationMode;
+import org.eclipse.fx.drift.Vec2i;
 import org.eclipse.fx.drift.internal.GL;
 import org.eclipse.fx.drift.internal.backend.BackSwapChain;
-import org.eclipse.fx.drift.internal.backend.BackSwapChain.PresentationMode;
 import org.eclipse.fx.drift.internal.backend.Backend;
 import org.eclipse.fx.drift.internal.backend.BackendImpl;
 import org.eclipse.fx.drift.internal.backend.Image;
 import org.eclipse.fx.drift.internal.common.NVDXInteropImageData;
 import org.eclipse.fx.drift.internal.frontend.Frontend;
 import org.eclipse.fx.drift.internal.frontend.FrontendImpl;
-import org.eclipse.fx.drift.internal.math.Vec2i;
 import org.eclipse.fx.drift.internal.prism.Prism;
 import org.eclipse.fx.drift.internal.transport.VMTransport;
 
@@ -28,7 +28,7 @@ import javafx.stage.Stage;
 @SuppressWarnings("restriction")
 public class SimpleColorSample extends Application {
 
-	private DriftFXSurface2 surface;
+	private DriftFXSurface surface;
 	
 	private Frontend frontend;
 	private Backend backend;
@@ -67,7 +67,7 @@ public class SimpleColorSample extends Application {
 		
 		Scene scene = new Scene(root);
 		
-		surface = new DriftFXSurface2();
+		surface = new DriftFXSurface();
 		
 		frontend = new FrontendImpl(surface);
 		backend = new BackendImpl();
@@ -138,7 +138,7 @@ public class SimpleColorSample extends Application {
 		
 		GL.destroyContext(ctx);
 		
-		swapChain.release();
+		swapChain.dispose();
 		swapChain = null;
 		
 	}
