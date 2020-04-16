@@ -5,6 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(lldb) Anfügen",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceFolder}/build/lib/DriftGL/libDriftGL.dylib",
+                
+            "processId": "${command:pickProcess}",
+            "MIMode": "lldb"
+        },
+        {
+            "name": "(lldb) Starten",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/lib/DriftGL/test_create_context",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb"
+        },
+        {
             "type": "java",
             "name": "SimpleColorSample",
             "request": "launch",

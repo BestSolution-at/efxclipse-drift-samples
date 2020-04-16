@@ -89,6 +89,7 @@ import org.eclipse.fx.drift.RenderTarget;
 import org.eclipse.fx.drift.Renderer;
 import org.eclipse.fx.drift.StandardTransferTypes;
 import org.eclipse.fx.drift.SwapChain;
+import org.eclipse.fx.drift.TransferType;
 import org.eclipse.fx.drift.Vec2i;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -124,6 +125,8 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -187,6 +190,8 @@ public class WavefrontObjDemo2 extends Application {
 	
 	private SwapChain swapChain;
 	private Renderer renderer;
+	
+	private TransferType txType = StandardTransferTypes.MainMemory;
     
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -215,7 +220,12 @@ public class WavefrontObjDemo2 extends Application {
 		Button stop = new Button("stop");
 		stop.setOnAction(e -> alive = false);
 		
-		HBox buttons = new HBox(start, stop);
+		ComboBox<TransferType> txMode = new ComboBox<>();
+		txMode.getItems().addAll(StandardTransferTypes.MainMemory, StandardTransferTypes.NVDXInterop, StandardTransferTypes.IOSurface);
+		txMode.setValue(txType);
+		txMode.valueProperty().addListener((obs, ov, nv) -> txType = nv);
+		
+		HBox buttons = new HBox(start, stop, txMode);
 		root.setTop(buttons);
 		
 		surface.setOnMouseMoved(event -> {
@@ -251,27 +261,33 @@ public class WavefrontObjDemo2 extends Application {
 	}
     
     long ctx;
+	private TransferType curTxType;
     
     void doInit() throws IOException {
     	
-    	ctx = org.eclipse.fx.drift.internal.GL.createContext(0, 1, 0);
+    	//ctx = org.eclipse.fx.drift.internal.GL.createContext(0, 1, 0);
+    	ctx = org.eclipse.fx.drift.internal.GL.createSharedCompatContext(0);
     	org.eclipse.fx.drift.internal.GL.makeContextCurrent(ctx);
     	System.err.println("Context is " + ctx);
     	
     	caps = GL.createCapabilities();
+    	
     	System.err.println("CAPS: " + caps.OpenGL32);
-        if (!caps.GL_ARB_shader_objects) {
-            throw new AssertionError("This demo requires the ARB_shader_objects extension.");
-        }
-        if (!caps.GL_ARB_vertex_shader) {
-            throw new AssertionError("This demo requires the ARB_vertex_shader extension.");
-        }
-        if (!caps.GL_ARB_fragment_shader) {
-            throw new AssertionError("This demo requires the ARB_fragment_shader extension.");
-        }
+    	System.err.println("ARB_shader_objects = " + caps.GL_ARB_shader_objects
+    			+ ", ARB_vertex_shader = " + caps.GL_ARB_vertex_shader
+    			+ ", ARB_fragment_shader = " + caps.GL_ARB_fragment_shader);
+//        if (!caps.GL_ARB_shader_objects) {
+//            throw new AssertionError("This demo requires the ARB_shader_objects extension.");
+//        }
+//        if (!caps.GL_ARB_vertex_shader) {
+//            throw new AssertionError("This demo requires the ARB_vertex_shader extension.");
+//        }
+//        if (!caps.GL_ARB_fragment_shader) {
+//            throw new AssertionError("This demo requires the ARB_fragment_shader extension.");
+//        }
         debugProc = GLUtil.setupDebugMessageCallback();
         
-        glClearColor(0.0f, 0f, 0f, 0f);
+        glClearColor(0f, 0f, 0f, 0f);
         glEnable(GL_DEPTH_TEST);
 
         /* Create all needed GL resources */
@@ -433,15 +449,16 @@ public class WavefrontObjDemo2 extends Application {
         	
         	Vec2i size = renderer.getSize();
 
-        	if (swapChain == null || size.x != width || size.y != height) {
+        	if (swapChain == null || size.x != width || size.y != height || curTxType != txType) {
 				System.err.println("(re)create swapchain");
 				if (swapChain != null) {
 					swapChain.dispose();
 				}
-				swapChain = renderer.createSwapChain(size, 3, PresentationMode.MAILBOX, StandardTransferTypes.MainMemory);
+				swapChain = renderer.createSwapChain(size, 2, PresentationMode.MAILBOX, txType);
 				
 				width = size.x;
 				height = size.y;
+				curTxType = txType;
 			}
         	
             update();
