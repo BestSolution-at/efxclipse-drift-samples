@@ -88,7 +88,7 @@ import org.eclipse.fx.drift.PresentationMode;
 import org.eclipse.fx.drift.RenderTarget;
 import org.eclipse.fx.drift.Renderer;
 import org.eclipse.fx.drift.StandardTransferTypes;
-import org.eclipse.fx.drift.SwapChain;
+import org.eclipse.fx.drift.Swapchain;
 import org.eclipse.fx.drift.TransferType;
 import org.eclipse.fx.drift.Vec2i;
 import org.joml.Matrix3f;
@@ -188,7 +188,7 @@ public class WavefrontObjDemo2 extends Application {
 	
 	private boolean alive;
 	
-	private SwapChain swapChain;
+	private Swapchain swapChain;
 	private Renderer renderer;
 	
 	private TransferType txType = StandardTransferTypes.MainMemory;
