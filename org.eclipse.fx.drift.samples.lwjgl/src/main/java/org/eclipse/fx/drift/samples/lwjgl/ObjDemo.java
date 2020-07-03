@@ -93,6 +93,9 @@ import org.eclipse.fx.drift.Swapchain;
 import org.eclipse.fx.drift.SwapchainConfig;
 import org.eclipse.fx.drift.TransferType;
 import org.eclipse.fx.drift.Vec2i;
+import org.eclipse.fx.drift.samples.lwjgl.WavefrontObjDemo2.Model;
+import org.eclipse.fx.drift.samples.lwjgl.WavefrontObjDemo2.Model.Material;
+import org.eclipse.fx.drift.samples.lwjgl.WavefrontObjDemo2.Model.Mesh;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -135,14 +138,12 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-/**
- * Shows how to load models in Wavefront obj and mlt format with Assimp binding and render them with
- * OpenGL.
- *
- * @author Zhang Hai
- */
-public class WavefrontObjDemo2 extends Application {
 
+import javafx.scene.layout.BorderPane;
+
+public class ObjDemo extends BorderPane {
+
+	private final DriftFXSurface surface;
     int width = 1024;
     int height = 768;
     
@@ -185,8 +186,6 @@ public class WavefrontObjDemo2 extends Application {
 //    GLFWScrollCallback sCallback;
     Callback debugProc;
 
-    
-    private DriftFXSurface surface;
 	
 	private boolean alive;
 	
@@ -194,25 +193,23 @@ public class WavefrontObjDemo2 extends Application {
 	private Renderer renderer;
 	
 	private TransferType txType = StandardTransferTypes.MainMemory;
-    
-	@Override
-	public void start(Stage primaryStage) throws Exception {
-
-//		primaryStage.initStyle(StageStyle.TRANSPARENT);
+	
+	public ObjDemo() {
+		// lwjgl cfg
+		Configuration.DEBUG.set(true);
+		Configuration.DEBUG_FUNCTIONS.set(false);
+		Configuration.DEBUG_STREAM.set(System.err);
 		
-		BorderPane root = new BorderPane();
-		root.setBackground(null);
-		root.setPadding(new Insets(40));
-		root.setPrefSize(1024, 768);
-		Scene scene = new Scene(root);
-		scene.setFill(Color.TRANSPARENT);
+		
+		setBackground(null);
+		setPadding(new Insets(40));
+		setPrefSize(1024, 768);
 		
 		surface = new DriftFXSurface();
-		
 		renderer = GLRenderer.getRenderer(surface);
-
-		root.setCenter(surface);
-
+		
+		setCenter(surface);
+		
 		Button start = new Button("start");
 		start.setOnAction(e -> {
 			Thread t = new Thread(this::run);
@@ -228,7 +225,7 @@ public class WavefrontObjDemo2 extends Application {
 		txMode.valueProperty().addListener((obs, ov, nv) -> txType = nv);
 		
 		HBox buttons = new HBox(start, stop, txMode);
-		root.setTop(buttons);
+		setTop(buttons);
 		
 		surface.setOnMouseMoved(event -> {
 			rotation = ((float) event.getX() / width - 0.5f) * 2f * (float) Math.PI;
@@ -246,22 +243,14 @@ public class WavefrontObjDemo2 extends Application {
            }
 		});
 		
-		primaryStage.setScene(scene);
-		primaryStage.setOnCloseRequest(event -> {
-			alive = false;
-		});
-		primaryStage.show();
+//		primaryStage.setOnCloseRequest(event -> {
+//			alive = false;
+//		});
+		
+		
 	}
 	
-	public static void main(String[] args) {
-		Configuration.DEBUG.set(true);
-		Configuration.DEBUG_FUNCTIONS.set(false);
-		Configuration.DEBUG_STREAM.set(System.err);
-		
-//		org.eclipse.fx.drift.internal.GL.initialize();
-		launch(args);
-	}
-    
+
     long ctx;
 	private TransferType curTxType;
     
@@ -624,5 +613,5 @@ public class WavefrontObjDemo2 extends Application {
                 }
             }
         }
-    }
+}
 }

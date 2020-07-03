@@ -1,5 +1,10 @@
 package org.eclipse.fx.drift.samples.cpp;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+
+import org.eclipse.fx.core.IOUtils;
 import org.eclipse.fx.drift.DriftFXSurface;
 import org.eclipse.fx.drift.GLRenderer;
 import org.eclipse.fx.drift.Renderer;
@@ -8,7 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 
-public class SimpleColorSample extends BorderPane {
+public class SimpleTriangleSample extends BorderPane {
 
 	private final DriftFXSurface surface;
 	
@@ -16,8 +21,7 @@ public class SimpleColorSample extends BorderPane {
 	
 	private long nativeRef;
 	
-	public SimpleColorSample() {
-	
+	public SimpleTriangleSample() {
 		System.loadLibrary("driftcpp");
 		System.loadLibrary("samples");
 		
@@ -53,4 +57,14 @@ public class SimpleColorSample extends BorderPane {
 	private native void nStart(long nativeRef);
 	private native void nStop(long nativeRef);
 
+	public static String loadResource(String name) {
+		try (InputStream in = SimpleTriangleSample.class.getResourceAsStream(name)) {
+			return IOUtils.readToString(in, StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
+	
 }

@@ -1,4 +1,4 @@
-package org.eclipse.fx.drift.samples.cpp;
+package org.eclipse.fx.drift.samples.lwjgl;
 
 import org.eclipse.fx.drift.samples.IDriftFXSampleProvider;
 import org.osgi.service.component.annotations.Component;
@@ -6,16 +6,16 @@ import org.osgi.service.component.annotations.Component;
 import javafx.scene.Node;
 
 @Component(xmlns = "http://www.osgi.org/xmlns/scr/v1.3.0")
-public class SimpleColorSampleProvider implements IDriftFXSampleProvider {
+public class WavefrontObjDemoProvider implements IDriftFXSampleProvider {
 	
 	@Override
 	public String getTitle() {
-		return "cpp - simple color";
+		return "lwjgl - wavefront obj demo";
 	}
 	
 	@Override
 	public Node createInstance() {
-		return new SimpleColorSample();
+		return new ObjDemo();
 	}
 
 }
