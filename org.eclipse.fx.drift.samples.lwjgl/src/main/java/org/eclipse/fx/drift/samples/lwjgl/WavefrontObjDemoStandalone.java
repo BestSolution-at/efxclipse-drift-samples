@@ -141,7 +141,7 @@ import javafx.stage.StageStyle;
  *
  * @author Zhang Hai
  */
-public class WavefrontObjDemo2 extends Application {
+public class WavefrontObjDemoStandalone extends Application {
 
     int width = 1024;
     int height = 768;

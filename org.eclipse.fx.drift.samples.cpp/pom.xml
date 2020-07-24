@@ -2,24 +2,25 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
+
 	<parent>
-		<groupId>org.eclipse.fx.drift</groupId>
+		<groupId>org.eclipse.fx.drift.samples</groupId>
 		<artifactId>parent</artifactId>
 		<version>0.1.0-SNAPSHOT</version>
 	</parent>
+	
 	<artifactId>org.eclipse.fx.drift.samples.cpp</artifactId>
 
 	<dependencies>
+
+		
 		<dependency>
-			<groupId>org.eclipse.fx.drift</groupId>
-			<artifactId>org.eclipse.fx.drift</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.fx.drift</groupId>
+			<groupId>org.eclipse.fx.drift.samples</groupId>
 			<artifactId>org.eclipse.fx.drift.samples</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
+		
 		<dependency>
 		    <groupId>org.osgi</groupId>
 		    <artifactId>org.osgi.service.component.annotations</artifactId>
@@ -27,11 +28,6 @@
 		    <scope>compile</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>at.bestsolution.efxclipse.rt</groupId>
-			<artifactId>org.eclipse.fx.core</artifactId>
-			<version>${efx-org.eclipse.fx.core}</version>
-		</dependency>
 	</dependencies>
 
 	<build>

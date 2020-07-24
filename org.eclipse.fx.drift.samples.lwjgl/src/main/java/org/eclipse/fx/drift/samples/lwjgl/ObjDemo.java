@@ -93,9 +93,6 @@ import org.eclipse.fx.drift.Swapchain;
 import org.eclipse.fx.drift.SwapchainConfig;
 import org.eclipse.fx.drift.TransferType;
 import org.eclipse.fx.drift.Vec2i;
-import org.eclipse.fx.drift.samples.lwjgl.WavefrontObjDemo2.Model;
-import org.eclipse.fx.drift.samples.lwjgl.WavefrontObjDemo2.Model.Material;
-import org.eclipse.fx.drift.samples.lwjgl.WavefrontObjDemo2.Model.Mesh;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -126,20 +123,11 @@ import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.Callback;
 import org.lwjgl.system.Configuration;
 
-import javafx.application.Application;
 import javafx.geometry.Insets;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-
-
-import javafx.scene.layout.BorderPane;
 
 public class ObjDemo extends BorderPane {
 

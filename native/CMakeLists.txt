@@ -172,10 +172,10 @@ if (LINUX)
 	list(APPEND LinkLibraries X11)
 endif (LINUX)
 
-add_subdirectory(lib/DriftGL)
+#add_subdirectory(lib/DriftGL)
 
-add_subdirectory(DriftFX)
-add_subdirectory(driftcpp)
+#add_subdirectory(DriftFX)
+#add_subdirectory(driftcpp)
 
 add_subdirectory(samples)
 
