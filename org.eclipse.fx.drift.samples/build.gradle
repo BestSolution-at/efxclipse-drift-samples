@@ -1,0 +1,25 @@
+plugins {
+    id 'java'
+    id "biz.aQute.bnd.builder"
+    id 'eclipse'
+}
+
+dependencies {
+    implementation 'org.eclipse.fx:org.eclipse.fx.drift:999.0.0-SNAPSHOT'
+    implementation 'org.openjfx:javafx-controls:11'
+
+    implementation 'at.bestsolution.efxclipse.rt:org.eclipse.fx.core:3.6.0.201907240201'
+
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
+}
+
+jar {
+//    bnd('-exportcontents': 'org.eclipse.fx.samples.*')
+//    bnd('Service-Component': '*')
+    
+	manifest {
+        attributes('Export-Package': 'org.eclipse.fx.samples')
+        attributes('Private-Package': 'org.eclipse.fx.samples.*')
+	}
+}

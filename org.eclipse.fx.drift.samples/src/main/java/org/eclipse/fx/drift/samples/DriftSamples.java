@@ -49,6 +49,8 @@ public class DriftSamples extends Application {
 		
 		List<IDriftFXSampleProvider> services = ServiceUtils.getServiceList(IDriftFXSampleProvider.class);
 		
+		System.err.println("Found Sample Providers: " + services);
+		
 		for (IDriftFXSampleProvider provider : services) {
 			Button b = new Button(provider.getTitle());
 			b.setOnAction(e -> startSample(provider));

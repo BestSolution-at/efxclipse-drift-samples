@@ -1,0 +1,64 @@
+plugins {
+    id 'application'
+    //id "com.athaydes.osgi-run" version "1.6.0"
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://repo.eclipse.org/content/groups/efxclipse'
+    }
+    maven {
+        url = 'https://maven.bestsolution.at/efxclipse-releases'
+    }
+
+}
+
+subprojects {
+    repositories {
+        mavenCentral()
+        maven {
+            url = 'https://repo.eclipse.org/content/groups/efxclipse'
+        }
+        maven {
+            url = 'https://maven.bestsolution.at/efxclipse-releases'
+        }
+
+    }
+}
+
+dependencies {
+    implementation project(':org.eclipse.fx.drift.samples')
+    implementation project(':org.eclipse.fx.drift.samples.lwjgl')
+    implementation project(':org.eclipse.fx.drift.samples.cpp')
+
+ /*   
+    osgiRuntime 'org.eclipse.platform:org.eclipse.equinox.console:1.4.100'
+
+    osgiRuntime 'org.osgi:org.osgi.service.cm:1.6.0'
+    osgiRuntime 'org.osgi:org.osgi.service.metatype:1.4.0'
+    osgiRuntime 'org.osgi:org.osgi.util.promise:1.1.1'
+    osgiRuntime 'org.osgi:org.osgi.util.function:1.1.0'
+
+    osgiRuntime 'org.apache.felix:org.apache.felix.scr:2.1.20'
+
+    osgiRuntime 'org.eclipse.fx:org.eclipse.fx.drift:999.0.0-SNAPSHOT'
+*/
+    //osgiRuntime project(':org.eclipse.fx.drift.samples')
+    //osgiRuntime project(':org.eclipse.fx.drift.samples.lwjgl')
+    //osgiRuntime project(':org.eclipse.fx.drift.samples.cpp')
+}
+
+application {
+    mainClass = 'org.eclipse.fx.drift.samples.DriftSamples'
+}
+
+/*
+runOsgi {
+    configSettings = 'equinox'
+    osgiMain = 'org.eclipse.platform:org.eclipse.osgi:3.15.300'
+    programArgs = '-console -consoleLog'
+    bundles = []
+    excludedBundles = ['.*animal-sniffer.*']
+}
+*/

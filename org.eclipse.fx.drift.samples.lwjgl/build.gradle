@@ -1,0 +1,39 @@
+plugins {
+    id 'java-library'
+    id "biz.aQute.bnd.builder"
+    id 'eclipse'
+}
+
+def lwjglVersion = '3.2.1'
+def lwjglNatives = 'natives-windows'
+
+dependencies {
+    api 'org.eclipse.fx:org.eclipse.fx.drift:999.0.0-SNAPSHOT'
+    api project(':org.eclipse.fx.drift.samples')
+
+    api 'org.osgi:org.osgi.service.component.annotations:1.3.0'
+
+/*
+    api "org.lwjgl:lwjgl:$lwjglVersion"
+    implementation "org.lwjgl:lwjgl:$lwjglVersion:$lwjglNatives"
+    api "org.lwjgl:lwjgl-assimp:$lwjglVersion"
+    implementation "org.lwjgl:lwjgl-assimp:$lwjglVersion:$lwjglNatives"
+    api "org.lwjgl:lwjgl-opengl:$lwjglVersion"
+    implementation "org.lwjgl:lwjgl-opengl:$lwjglVersion:$lwjglNatives"
+    */
+    implementation 'org.joml:joml:1.9.22'
+
+    implementation "org.lwjgl.osgi:org.lwjgl.lwjgl:$lwjglVersion"
+    implementation "org.lwjgl.osgi:org.lwjgl.assimp:$lwjglVersion"
+    implementation "org.lwjgl.osgi:org.lwjgl.opengl:$lwjglVersion"
+
+
+}
+
+jar {
+	manifest {
+		//attributes('Service-Component': '*')
+		attributes('Private-Package': 	'org.eclipse.fx.drift.samples.lwjgl')
+        attributes('Import-Package': '!javafx.*, *')
+	}
+}

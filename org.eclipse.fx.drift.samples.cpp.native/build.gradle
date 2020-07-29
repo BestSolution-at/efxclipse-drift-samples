@@ -1,0 +1,63 @@
+plugins {
+    id 'cpp-library'
+}
+
+repositories {
+    maven {
+        url = "./native-repo"
+    }
+}
+
+library {
+    baseName = 'samples'
+    dependencies {
+        api 'org.eclipse.fx.drift:driftcpp:999.0.0+'
+        implementation project(':libs:glew')
+        implementation project(':libs:minctx')
+    }
+    linkage = [ Linkage.SHARED ]
+
+    targetMachines = [
+      machines.linux.x86_64,
+      machines.windows.x86_64,
+      machines.macOS.x86_64
+    ]
+
+    binaries.configureEach { binary ->
+      def compileTask = compileTask.get()
+      def linkTask = linkTask.get()
+
+      addJNIIncludes(compileTask)
+
+      linkTask.linkerArgs.add("opengl32.lib")
+      linkTask.linkerArgs.add("gdi32.lib")
+      linkTask.linkerArgs.add("user32.lib")
+    }
+}
+
+tasks.withType(CppCompile).configureEach {
+  macros.put("GLEW_STATIC", null)
+  compilerArgs.add '-std=c++11'
+}
+
+
+import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.nativeplatform.platform.OperatingSystem
+import org.gradle.internal.jvm.Jvm
+
+def getJNIPlatformDir() {
+  if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+    'win32'
+  } else if (Os.isFamily(Os.FAMILY_MAC)) {
+    'darwin'
+  } else if (Os.isFamily(Os.FAMILY_UNIX)) {
+    'linux'
+  }
+}
+
+def addJNIIncludes(compileTask) {
+  def includeDir = Jvm.current().javaHome.toPath().resolve('include')
+  def platformIncludeDir = includeDir.resolve(getJNIPlatformDir())
+  compileTask.includes(includeDir)
+  compileTask.includes(platformIncludeDir)
+}
