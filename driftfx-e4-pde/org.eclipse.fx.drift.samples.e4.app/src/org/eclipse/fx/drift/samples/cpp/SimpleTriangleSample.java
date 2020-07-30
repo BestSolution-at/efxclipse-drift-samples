@@ -39,7 +39,7 @@ public class SimpleTriangleSample extends BorderPane {
 	
 	private void start() {
 		if (nativeRef == 0) {
-			nativeRef = nInitialize(keepme = GLRenderer.getRenderer(surface));
+			nativeRef = nInitialize(keepme = GLRenderer.getRenderer(surface), this.getClass());
 			System.out.println("fyi: " + keepme.getSize().x);
 			nStart(nativeRef);
 		}
@@ -53,7 +53,7 @@ public class SimpleTriangleSample extends BorderPane {
 		}
 	}
 	
-	private native long nInitialize(Renderer renderer);
+	private native long nInitialize(Renderer renderer, Class<?> clazz);
 	private native void nDispose(long nativeRef);
 	private native void nStart(long nativeRef);
 	private native void nStop(long nativeRef);

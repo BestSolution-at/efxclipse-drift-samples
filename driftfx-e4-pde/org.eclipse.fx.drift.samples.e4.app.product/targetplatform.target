@@ -7,8 +7,8 @@
 			<unit id="org.eclipse.fx.target.feature.feature.group" version="3.6.2.202001141052"/>
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
-			<repository location="https://download.eclipse.org/efxclipse/driftfx/nightly/20200729-020952-fecfab7/"/>
-			<unit id="org.eclipse.fx.drift.feature.feature.group" version="999.0.0.20200729-020952-fecfab7"/>
+			<repository location="jar:file:/C:/Users/Christoph/Projects/drift-swap/efxclipse-drift/build/updatesite.zip!/"/>
+			<unit id="org.eclipse.fx.drift.feature.feature.group" version="999.0.0.foo0-3272e18"/>
 		</location>
 	</locations>
 </target>

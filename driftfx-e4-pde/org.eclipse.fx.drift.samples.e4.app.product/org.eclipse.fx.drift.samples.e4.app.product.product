@@ -3,7 +3,6 @@
 
 <product name="Drift e4 samples" uid="org.eclipse.fx.drift.samples.e4.app.product" id="org.eclipse.fx.drift.samples.e4.app.product" application="org.eclipse.fx.ui.workbench.fx.application" version="1.0.0" useFeatures="true" includeLaunchers="false">
 
-
    <configIni use="default">
    </configIni>
 
@@ -16,17 +15,15 @@
 
    <windowImages/>
 
-
    <launcher>
       <win useIco="false">
          <bmp/>
       </win>
    </launcher>
 
-
    <vm>
+      <windows include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8</windows>
    </vm>
-
 
    <plugins>
    </plugins>

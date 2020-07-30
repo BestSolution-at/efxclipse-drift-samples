@@ -1,8 +1,11 @@
 package org.eclipse.fx.drift.samples.cpp;
 
+import org.eclipse.fx.drift.DriftFX;
 import org.eclipse.fx.drift.DriftFXSurface;
 import org.eclipse.fx.drift.GLRenderer;
 import org.eclipse.fx.drift.Renderer;
+import org.eclipse.fx.drift.internal.DriftCPP;
+import org.eclipse.fx.drift.util.NativeUtil;
 
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
@@ -17,9 +20,8 @@ public class SimpleColorSample extends BorderPane {
 	private long nativeRef;
 	
 	public SimpleColorSample() {
-	
-		System.loadLibrary("driftcpp");
-		System.loadLibrary("samples");
+		DriftFX.useDriftCPP();
+		NativeUtil.loadLibrary(SimpleTriangleSample.class, "samples", System::loadLibrary, System::load);
 		
 		
 		surface = new DriftFXSurface();

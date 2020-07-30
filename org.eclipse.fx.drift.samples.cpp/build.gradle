@@ -2,6 +2,27 @@ plugins {
     id 'java-library'
     id "biz.aQute.bnd.builder"
     id 'eclipse'
+    
+        id 'org.openjfx.javafxplugin'
+    
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+def isJava11() {
+	true
+}
+
+if (isJava11()) {
+
+	javafx {
+		version = "11.0.2"
+		modules = [ 'javafx.controls' ]
+	}
+	
 }
 
 dependencies {

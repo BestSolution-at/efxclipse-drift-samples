@@ -2,6 +2,14 @@
 
 This repo contains samples for DriftFX. 
 
+
+### Usage
+
+To simple start the samples use gradle:
+```
+gradle run
+```
+
 #### Java 11 Notes
 
 eclipse VM arguments

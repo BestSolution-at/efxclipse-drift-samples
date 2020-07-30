@@ -1,3 +1,7 @@
 **/target/*
 **/hs_err_pid*.log
 build/
+**/native-repo
+.gradle
+
+/runtime-*/

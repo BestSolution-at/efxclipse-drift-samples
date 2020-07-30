@@ -33,6 +33,7 @@ namespace SimpleTriangleSample {
 		JavaVM* vm;
 		JNIEnv* env; 
 		jobject javaRenderer;
+		jclass cls;
 		bool running;
 		std::mutex mutex;
 		std::thread thread;
@@ -61,18 +62,30 @@ namespace SimpleTriangleSample {
 
 
 	std::string loadResource(RendererInstance* instance, std::string resource) {
-		jclass cSimpleTriangleSample = instance->env->FindClass("org/eclipse/fx/drift/samples/cpp/SimpleTriangleSample");
-		jmethodID mSimpleTriangleSampleLoadResource = instance->env->GetStaticMethodID(cSimpleTriangleSample, "loadResource", "(Ljava/lang/String;)Ljava/lang/String;");
+
+		std::cout << "loading resource via " << instance->cls << ": " << resource << std::endl;
+
+		//jclass cSimpleTriangleSample = instance->env->FindClass("org/eclipse/fx/drift/samples/cpp/SimpleTriangleSample");
+		jmethodID mLoadResource = instance->env->GetStaticMethodID(instance->cls, "loadResource", "(Ljava/lang/String;)Ljava/lang/String;");
+
+		std::cout << "mLoadResource=" << mLoadResource << std::endl;
+
 
 		jstring name = instance->env->NewStringUTF(resource.c_str());
 
-		jstring javaContent = (jstring)instance->env->CallStaticObjectMethod(cSimpleTriangleSample, mSimpleTriangleSampleLoadResource, name);
+		std::cout << "name=" << name << std::endl;
+
+		jstring javaContent = (jstring)instance->env->CallStaticObjectMethod(instance->cls, mLoadResource, name);
+
+		std::cout << "javaContent=" << javaContent << std::endl;
 
 		instance->env->DeleteLocalRef(name);
 
 		const char* cContent = instance->env->GetStringUTFChars(javaContent, NULL);
 		std::string content(cContent);
 		instance->env->ReleaseStringUTFChars(javaContent, cContent);
+
+		std::cout << "content=" << content << std::endl;
 
 		return content;
 	}
@@ -349,6 +362,8 @@ namespace SimpleTriangleSample {
 			jint attachResult = instance->vm->AttachCurrentThreadAsDaemon((void**)&instance->env, &args);
 			if (attachResult != JNI_OK) {
 				std::cerr << "Could not attach thread to jvm!!" << std::endl;
+			} else {
+				std::cout << "Attached Thread to jvm" << std::endl;
 			}
 		}
 
@@ -398,12 +413,13 @@ namespace SimpleTriangleSample {
 
 }
 
-extern "C" JNIEXPORT jlong JNICALL Java_org_eclipse_fx_drift_samples_cpp_SimpleTriangleSample_nInitialize(JNIEnv * env, jclass cls, jobject _renderer) {
+extern "C" JNIEXPORT jlong JNICALL Java_org_eclipse_fx_drift_samples_cpp_SimpleTriangleSample_nInitialize(JNIEnv * env, jclass cls, jobject _renderer, jclass clazz) {
 	JavaVM* vm;
 	env->GetJavaVM(&vm);
 
 	auto instance = new SimpleTriangleSample::RendererInstance();
 	instance->vm = vm;
+	instance->cls = (jclass) env->NewGlobalRef(clazz);
 	instance->javaRenderer = env->NewGlobalRef(_renderer);
 
 	return (jlong) instance;

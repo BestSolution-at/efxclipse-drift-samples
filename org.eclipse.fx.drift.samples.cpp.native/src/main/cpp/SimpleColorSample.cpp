@@ -40,6 +40,7 @@ namespace SimpleColorSample {
 
 
 	void beforeLoop(RendererInstance* instance) {
+		std::cout << "trace beforeLoop" << std::endl;
 
 		instance->glContext = minctx::CreateContext(nullptr, 4, 2);
 
@@ -53,7 +54,8 @@ namespace SimpleColorSample {
 	}
 
 	void afterLoop(RendererInstance* instance) {
-
+		std::cout << "trace afterLoop" << std::endl;
+	
 		glDeleteFramebuffers(1, &instance->fb);
 
 		minctx::DestroyContext(instance->glContext);
@@ -61,6 +63,7 @@ namespace SimpleColorSample {
 	}
 
 	void recreateSwapchain(RendererInstance* instance) {
+		std::cout << "trace recreateSwapchain" << std::endl;
 		if (instance->swapchain != nullptr) {
 			delete instance->swapchain;
 			instance->swapchain = nullptr;
@@ -137,6 +140,7 @@ namespace SimpleColorSample {
 	}
 
 	void onLoop(RendererInstance* instance) {
+		std::cout << "trace onLoop" << std::endl;
 		//std::cout << "onLoop" << std::endl;
 
 		if (instance->swapchain == nullptr || needsResize(instance)) {
@@ -144,7 +148,6 @@ namespace SimpleColorSample {
 		}
 
 		driftfx::RenderTarget* target = instance->swapchain->acquire();
-
 
 		glBindFramebuffer(GL_FRAMEBUFFER, instance->fb);
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, driftfx::GLRenderer::getGLTextureId(target), 0);
@@ -187,7 +190,9 @@ namespace SimpleColorSample {
 
 		// first we need to attach the thread to the jvm
 		jint stat = instance->vm->GetEnv((void**)&env, JNI_VERSION_1_6);
+		std::cout << "stat = " << stat << std::endl;
 		if (stat == JNI_EDETACHED) {
+			std::cout << "attaching thread to jvm" << std::endl;
 			// attach
 			std::ostringstream os;
 			os << "C++ Thread id: " << std::this_thread::get_id();
@@ -204,8 +209,10 @@ namespace SimpleColorSample {
 				std::cerr << "Could not attach thread to jvm!!" << std::endl;
 			}
 		}
+		std::cout << "done attaching thread" << std::endl;
 
-
+		std::cout << " calling driftfx::initializeRenderer(" << env << ", " << instance->javaRenderer << ")" << std::endl;
+		
 		instance->renderer = driftfx::initializeRenderer(env, instance->javaRenderer);
 
 		beforeLoop(instance);

@@ -1,6 +1,22 @@
 plugins {
     id 'application'
     //id "com.athaydes.osgi-run" version "1.6.0"
+    id 'org.openjfx.javafxplugin'
+    
+}
+
+
+def isJava11() {
+	true
+}
+
+if (isJava11()) {
+
+	javafx {
+		version = "11.0.2"
+		modules = [ 'javafx.controls' ]
+	}
+	
 }
 
 repositories {
@@ -49,8 +65,38 @@ dependencies {
     //osgiRuntime project(':org.eclipse.fx.drift.samples.cpp')
 }
 
-application {
-    mainClass = 'org.eclipse.fx.drift.samples.DriftSamples'
+
+
+
+task run11(type: JavaExec) {
+	executable = "${System.getenv('JAVA_HOME_11')}/bin/java"
+	def modules = sourceSets.main.runtimeClasspath.filter { jar -> jar.getName().contains('javafx-') } .getAsPath()
+	classpath = sourceSets.main.runtimeClasspath
+	main = 'org.eclipse.fx.drift.samples.DriftSamples'
+	jvmArgs = [
+		'--module-path', modules,
+		'--add-modules', 'javafx.controls',
+		'--add-exports', 'javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED',
+		'--add-exports', 'javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED', 
+		'--add-exports', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED', 
+		'--add-exports', 'javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED', 
+		'--add-exports', 'javafx.graphics/com.sun.javafx.geom=ALL-UNNAMED', 
+		'--add-exports', 'javafx.graphics/com.sun.javafx.geom.transform=ALL-UNNAMED', 
+		'--add-exports', 'javafx.graphics/com.sun.javafx.scene.text=ALL-UNNAMED', 
+		'--add-exports', 'javafx.graphics/com.sun.javafx.font=ALL-UNNAMED', 
+		'--add-exports', 'javafx.graphics/com.sun.prism.paint=ALL-UNNAMED', 
+		'--add-opens', 'javafx.graphics/com.sun.prism=ALL-UNNAMED',
+		'--add-opens', 'javafx.graphics/com.sun.prism.es2=ALL-UNNAMED', 
+		'--add-opens', 'javafx.graphics/com.sun.prism.d3d=ALL-UNNAMED', 
+		'--add-opens', 'javafx.graphics/com.sun.prism.impl=ALL-UNNAMED'	
+	]
+}
+
+task run8(type: JavaExec) {
+	executable = "${System.getenv('JAVA_HOME_8')}/bin/java"
+	classpath = sourceSets.main.runtimeClasspath
+	main = 'org.eclipse.fx.drift.samples.DriftSamples'
+	
 }
 
 /*
