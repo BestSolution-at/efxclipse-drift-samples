@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmi:id="_xNJ6IdGSEeqjyaTcZgEXXA" elementId="org.eclipse.e4.application" bindingContexts="_xNJ6INGSEeqjyaTcZgEXXA">
+  <children xsi:type="basic:TrimmedWindow" xmi:id="_aa_fANGUEeqf3vg-b0Y2rA" elementId="org.eclipse.fx.drift.samples.e4.app.trimmedwindow.driftfxe4samples" label="DriftFX e4 samples">
+    <children xsi:type="basic:PartSashContainer" xmi:id="_qWY50NGWEeqf3vg-b0Y2rA" elementId="org.eclipse.fx.drift.samples.e4.app.partsashcontainer.0">
+      <children xsi:type="basic:Part" xmi:id="_iCpXcNGVEeqf3vg-b0Y2rA" elementId="org.eclipse.fx.drift.samples.e4.app.part.simplecolorsample" contributionURI="bundleclass://org.eclipse.fx.drift.samples.e4.app/org.eclipse.fx.drift.samples.e4.app.SimpleColorSamplePart" label="Simple Color Sample"/>
+      <children xsi:type="basic:Part" xmi:id="_kxWZYNGVEeqf3vg-b0Y2rA" elementId="org.eclipse.fx.drift.samples.e4.app.part.simpletrianglesample" contributionURI="bundleclass://org.eclipse.fx.drift.samples.e4.app/org.eclipse.fx.drift.samples.e4.app.SimpleTriangleSamplePart" label="Simple Triangle Sample"/>
+    </children>
+  </children>
+  <rootContext xmi:id="_xNJ6INGSEeqjyaTcZgEXXA" elementId="org.eclipse.ui.contexts.dialogAndWindow" name="In Dialog and Windows">
+    <children xmi:id="_xNJ6ItGSEeqjyaTcZgEXXA" elementId="org.eclipse.ui.contexts.window" name="In Windows"/>
+    <children xmi:id="_xNJ6I9GSEeqjyaTcZgEXXA" elementId="org.eclipse.ui.contexts.dialog" name="In Dialogs"/>
+  </rootContext>
+  <addons xmi:id="_xNJ6JNGSEeqjyaTcZgEXXA" elementId="org.eclipse.e4.core.commands.service" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
+  <addons xmi:id="_xNJ6JdGSEeqjyaTcZgEXXA" elementId="org.eclipse.e4.ui.contexts.service" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
+  <addons xmi:id="_xNJ6JtGSEeqjyaTcZgEXXA" elementId="org.eclipse.fx.ui.keybindings.e4.service" contributionURI="bundleclass://org.eclipse.fx.ui.keybindings.e4/org.eclipse.fx.ui.keybindings.e4.BindingServiceAddon"/>
+  <addons xmi:id="_xNJ6J9GSEeqjyaTcZgEXXA" elementId="org.eclipse.e4.ui.workbench.commands.model" contributionURI="bundleclass://org.eclipse.e4.ui.workbench/org.eclipse.e4.ui.internal.workbench.addons.CommandProcessingAddon"/>
+  <addons xmi:id="_xNJ6KNGSEeqjyaTcZgEXXA" elementId="org.eclipse.e4.ui.workbench.contexts.model" contributionURI="bundleclass://org.eclipse.e4.ui.workbench/org.eclipse.e4.ui.internal.workbench.addons.ContextProcessingAddon"/>
+  <addons xmi:id="_xNJ6KdGSEeqjyaTcZgEXXA" elementId="org.eclipse.fx.ui.keybindings.e4.model" contributionURI="bundleclass://org.eclipse.fx.ui.keybindings.e4/org.eclipse.fx.ui.keybindings.e4.BindingProcessingAddon"/>
+  <addons xmi:id="_xNJ6KtGSEeqjyaTcZgEXXA" elementId="org.eclipse.e4.ui.workbench.addons.HandlerProcessingAddon" contributionURI="bundleclass://org.eclipse.e4.ui.workbench/org.eclipse.e4.ui.internal.workbench.addons.HandlerProcessingAddon"/>
+</application:Application>

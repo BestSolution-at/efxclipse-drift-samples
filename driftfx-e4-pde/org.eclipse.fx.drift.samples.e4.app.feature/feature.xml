@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.fx.drift.samples.e4.app.feature"
+      label="Drift e4 samples Application Feature"
+      version="1.0.0.qualifier"
+      provider-name="${BundleProject_bundleVendor}">
+
+   <description url="http://www.efxclipse.org">
+      TODO FILL WITH CONTENT
+   </description>
+
+   <copyright url="http://www.efxclipse.org">
+      TODO FILL WITH CONTENT
+   </copyright>
+
+   <license url="http://www.efxclipse.org">
+      TODO FILL WITH CONTENT
+   </license>
+
+   <plugin
+         id="org.eclipse.fx.drift.samples.e4.app"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.fx.drift"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
