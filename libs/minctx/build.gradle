@@ -2,12 +2,31 @@ plugins {
     id 'cpp-library'
 }
 
+import org.apache.tools.ant.taskdefs.condition.Os
+
+def createCppTree(proj) {
+  def tree = proj.fileTree('src')
+  if (Os.isFamily(Os.FAMILY_WINDOWS)) { 
+    tree.exclude '**/macos'
+    tree.exclude '**/linux'
+  } else if (Os.isFamily(Os.FAMILY_MAC)) {
+    tree.exclude '**/win32'
+    tree.exclude '**/linux'
+  } else if (Os.isFamily(Os.FAMILY_UNIX)) {
+    tree.exclude '**/win32'
+    tree.exclude '**/macos'
+  }  
+  return tree
+}
+
 library {
     dependencies {
         implementation project(':libs:glew')
     }
 
     linkage = [ Linkage.STATIC ]
+
+    source.from createCppTree(project)
 
     targetMachines = [
       machines.linux.x86_64,
