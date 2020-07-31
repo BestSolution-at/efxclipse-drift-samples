@@ -14,6 +14,9 @@ namespace minctx {
 	};
 
 	Display* display;
+	
+	typedef GLXContext (*glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
+	typedef Bool (*glXMakeContextCurrentARBProc)(Display*, GLXDrawable, GLXDrawable, GLXContext);
 	glXCreateContextAttribsARBProc glXCreateContextAttribsARB;
 	glXMakeContextCurrentARBProc glXMakeContextCurrentARB;
 
