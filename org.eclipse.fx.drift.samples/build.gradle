@@ -14,7 +14,7 @@ java {
 
 
 def isJava11() {
-	true
+	false //true
 }
 
 if (isJava11()) {
@@ -41,8 +41,8 @@ jar {
 //    bnd('-exportcontents': 'org.eclipse.fx.samples.*')
 //    bnd('Service-Component': '*')
     
-	manifest {
-        attributes('Export-Package': 'org.eclipse.fx.samples')
-        attributes('Private-Package': 'org.eclipse.fx.samples.*')
-	}
+  manifest {
+    attributes('Export-Package': 'org.eclipse.fx.samples')
+    //attributes('Private-Package': 'org.eclipse.fx.samples.*')
+  }
 }

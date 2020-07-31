@@ -3,6 +3,9 @@
 
 #include <X11/Xlib.h>
 #include <GL/glx.h>
+//#include <GL/glew.h>
+//#include <GL/glxew.h>
+
 
 #include <iostream>
 
@@ -45,13 +48,6 @@ namespace minctx {
 		}
 		//std::cout << "GLX Version: " << glxMajor << "." << glxMinor << std::endl;
 
-		procs::Initialize([](const char* name) {
-			__GLXextFuncPtr proc = glXGetProcAddressARB((const GLubyte*) name);
-			if (proc == 0) {
-				//std::cout << " ! Could not acquire " << name << std::endl;
-			}
-			return (void*) proc;
-		});
 		glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc) glXGetProcAddressARB( (const GLubyte *) "glXCreateContextAttribsARB" );
 		glXMakeContextCurrentARB   = (glXMakeContextCurrentARBProc)   glXGetProcAddressARB( (const GLubyte *) "glXMakeContextCurrent"      );
 

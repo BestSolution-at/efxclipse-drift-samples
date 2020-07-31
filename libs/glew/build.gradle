@@ -23,4 +23,5 @@ library {
 tasks.withType(CppCompile).configureEach {
   macros.put("GLEW_STATIC", null)
   compilerArgs.add '-std=c++11'
+  compilerArgs.add '-fPIC'
 }

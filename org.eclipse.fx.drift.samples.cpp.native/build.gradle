@@ -29,9 +29,17 @@ library {
 
       addJNIIncludes(compileTask)
 
-      linkTask.linkerArgs.add("opengl32.lib")
-      linkTask.linkerArgs.add("gdi32.lib")
-      linkTask.linkerArgs.add("user32.lib")
+      if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        linkTask.linkerArgs.add("opengl32.lib")
+        linkTask.linkerArgs.add("gdi32.lib")
+        linkTask.linkerArgs.add("user32.lib")
+      } else if (Os.isFamily(Os.FAMILY_MAC)) {
+        linkTask.linkerArgs.add("-framework")
+        linkTask.linkerArgs.add("OpenGL")
+      } else if (Os.isFamily(Os.FAMILY_UNIX)) {
+        linkTask.linkerArgs.add("-lGL")
+        linkTask.linkerArgs.add("-lX11")
+      }
     }
 }
 

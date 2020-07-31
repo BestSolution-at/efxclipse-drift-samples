@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <string>
+#include <cstring>
 #include <iostream>
 #include <thread>
 #include <mutex>
@@ -219,7 +220,7 @@ namespace SimpleTriangleSample {
 		cfg.imageCount = 2;
 		cfg.size = instance->renderer->getSize();
 		std::cout << " using size " << cfg.size.x << " / " << cfg.size.y << std::endl;
-		cfg.transferType = driftfx::StandardTransferTypes::NVDXInterop;
+		cfg.transferType = driftfx::StandardTransferTypes::MainMemory; //NVDXInterop;
 
 		instance->swapchain = instance->renderer->createSwapchain(cfg);
 	}
