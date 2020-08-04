@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Drift e4 samples" uid="org.eclipse.fx.drift.samples.e4.app.product" id="org.eclipse.fx.drift.samples.e4.app.product" application="org.eclipse.fx.ui.workbench.fx.application" version="1.0.0" useFeatures="true" includeLaunchers="false">
+<product name="Drift e4 samples" uid="org.eclipse.fx.drift.samples.e4.app.product" id="org.eclipse.fx.drift.samples.e4.app.product" application="org.eclipse.fx.ui.workbench.fx.main-thread-application" version="1.0.0" useFeatures="true" includeLaunchers="false">
 
    <configIni use="default">
    </configIni>

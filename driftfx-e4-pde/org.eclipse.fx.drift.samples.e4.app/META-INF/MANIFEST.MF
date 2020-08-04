@@ -27,5 +27,5 @@ Import-Package: javax.inject;version="1.0.0",
  org.eclipse.fx.drift;version="999.0.0",
  org.eclipse.fx.drift.util;version="999.0.0"
 Service-Component: OSGI-INF/services/theme-default.xml
-Bundle-NativeCode: native/driftcpp.dll;native/samples.dll;osname=Win32;processor=x86-64
+Bundle-NativeCode: native/samples.dll;osname=Win32;processor=x86-64,native/libsamples.so;osname=Linux;processor=x86-64,native/libsamples.dylib;osname=MacOSX;processor=x86-64
 Export-Package: org.eclipse.fx.drift.samples.e4.app
