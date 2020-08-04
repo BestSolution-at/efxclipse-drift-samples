@@ -1,17 +1,15 @@
 plugins {
     id 'cpp-library'
+    id 'xcode'
 }
 
-repositories {
-    maven {
-        url = "./native-repo"
-    }
+def getFrameworkHeaderPath(framework) {
+    "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/${framework}.framework/Headers"
 }
 
 library {
     baseName = 'samples'
     dependencies {
-        api 'org.eclipse.fx.drift:driftcpp:999.0.0+'
         implementation project(':libs:glew')
         implementation project(':libs:minctx')
     }
@@ -22,6 +20,15 @@ library {
       machines.windows.x86_64,
       machines.macOS.x86_64
     ]
+
+    privateHeaders {
+        from file ('src/main/headers')
+    
+        if (Os.isFamily(Os.FAMILY_MAC)) {
+            from file ('src/main/headers-macos')
+//            from file(getFrameworkHeaderPath('OpenGL'))
+        }
+    }
 
     binaries.configureEach { binary ->
       def compileTask = compileTask.get()
@@ -34,8 +41,14 @@ library {
         linkTask.linkerArgs.add("gdi32.lib")
         linkTask.linkerArgs.add("user32.lib")
       } else if (Os.isFamily(Os.FAMILY_MAC)) {
+
+       //linkTask.linkerArgs.add('-stdlib=libc++')
+
         linkTask.linkerArgs.add("-framework")
         linkTask.linkerArgs.add("OpenGL")
+
+//linkTask.linkerArgs.add '-static'
+//linkTask.linkerArgs.add '-llibc++'
       } else if (Os.isFamily(Os.FAMILY_UNIX)) {
         linkTask.linkerArgs.add("-lGL")
         linkTask.linkerArgs.add("-lX11")

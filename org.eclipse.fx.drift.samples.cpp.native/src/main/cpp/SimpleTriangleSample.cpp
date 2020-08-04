@@ -14,7 +14,7 @@
 
 #include <minctx.h>
 
-#include <DriftFX/driftcpp.h>
+#include <driftcpp.h>
 
 namespace SimpleTriangleSample {
 
@@ -37,13 +37,14 @@ namespace SimpleTriangleSample {
 		jclass cls;
 		bool running;
 		std::mutex mutex;
-		std::thread thread;
+		std::thread* thread;
 
 		minctx::Context* glContext;
 
 		driftfx::Renderer* renderer;
 		driftfx::Swapchain* swapchain;
 
+		driftfx::TransferType* txType;
 
 		GLuint fb;
 		GLuint program;
@@ -92,112 +93,129 @@ namespace SimpleTriangleSample {
 	}
 
 	void beforeLoop(RendererInstance* instance) {
-
+        std::cout << "beforeLoop for " << instance << std::endl;
 		instance->glContext = minctx::CreateContext(nullptr, 4, 2);
 
 		std::cout << "glContext = " << instance->glContext << std::endl;
 
-		bool res = minctx::MakeContextCurrent(instance->glContext);
-		std::cout << " context is set: " << res << std::endl;
-		std::cout << "my context = " << minctx::IsContextCurrent(instance->glContext) << std::endl;
+		bool contextIsCurrent = minctx::MakeContextCurrent(instance->glContext);
+        
+        if (contextIsCurrent) {
+            if (GLEW_OK == glewInit()) {
+                
+                glGenFramebuffers(1, &instance->fb);
+                
+                GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+                GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+                
+                std::string VertexShaderCode = loadResource(instance, "Triangle.vertexshader");
+                std::string FragmentShaderCode = loadResource(instance, "Triangle.fragmentshader");
+                GLint Result = GL_FALSE;
+                int InfoLogLength;
+                
+                // Compile Vertex Shader
+                char const* VertexSourcePointer = VertexShaderCode.c_str();
+                glShaderSource(VertexShaderID, 1, &VertexSourcePointer, NULL);
+                glCompileShader(VertexShaderID);
+                
+                // Check Vertex Shader
+                glGetShaderiv(VertexShaderID, GL_COMPILE_STATUS, &Result);
+                glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
+                if (InfoLogLength > 0) {
+                    std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
+                    glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
+                    std::cout << (&VertexShaderErrorMessage[0]) << std::endl;
+                }
+                
+                // Compile Fragment Shader
+                char const* FragmentSourcePointer = FragmentShaderCode.c_str();
+                glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer, NULL);
+                glCompileShader(FragmentShaderID);
+                
+                // Check Fragment Shader
+                glGetShaderiv(FragmentShaderID, GL_COMPILE_STATUS, &Result);
+                glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
+                if (InfoLogLength > 0) {
+                    std::vector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
+                    glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
+                    std::cout << &FragmentShaderErrorMessage[0] << std::endl;
+                }
+                
+                // Link the program
+                std::cout << "Linking program" <<std::endl;
+                instance->program = glCreateProgram();
+                glAttachShader(instance->program, VertexShaderID);
+                glAttachShader(instance->program, FragmentShaderID);
+                glLinkProgram(instance->program);
+                
+                // Check the program
+                glGetProgramiv(instance->program, GL_LINK_STATUS, &Result);
+                glGetProgramiv(instance->program, GL_INFO_LOG_LENGTH, &InfoLogLength);
+                if (InfoLogLength > 0) {
+                    std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
+                    glGetProgramInfoLog(instance->program, InfoLogLength, NULL, &ProgramErrorMessage[0]);
+                    std::cout << (&ProgramErrorMessage[0]) << std::endl;
+                }
+                
+                glDetachShader(instance->program, VertexShaderID);
+                glDetachShader(instance->program, FragmentShaderID);
+                
+                glDeleteShader(VertexShaderID);
+                glDeleteShader(FragmentShaderID);
+                
+                
+                instance->rotID = glGetUniformLocation(instance->program, "rot");
+                
+                
+                // vertex array
+                glGenVertexArrays(1, &instance->vaID);
+                
+                static const Vertex data2[] = {
+                    {  0.0f,   0.5f, 0.0f, {0.0f, 0.0f, 1.0f} },
+                    {  0.45f, -0.5f, 0.0f, {0.0f, 1.0f, 0.0f} },
+                    { -0.45f, -0.5f, 0.0f, {1.0f, 0.0f, 0.0f} }
+                };
+                
+                GLuint vboID;
+                glGenBuffers(1, &vboID);
+                glBindBuffer(GL_ARRAY_BUFFER, vboID);
+                glBufferData(GL_ARRAY_BUFFER, sizeof(data2), data2, GL_STATIC_DRAW);
+                glBindBuffer(GL_ARRAY_BUFFER, 0);
+                
+                // build va
+                glBindVertexArray(instance->vaID);
+                
+                glBindBuffer(GL_ARRAY_BUFFER, vboID);
+                
+                glEnableVertexAttribArray(0);
+                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+                
+                glEnableVertexAttribArray(1);
+                glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(GLfloat)));
+                
+                glBindVertexArray(0);
+                
+                instance->angle = 0;
+                
+                std::cout << "initialization of gl stuff finished." << std::endl;
+                
+            } else {
+                std::cerr << "Failed to initialize glew - expect application to die." << std::endl << std::flush;
+            }
+        } else {
+            std::cerr << "Failed to make opengl context " << instance->glContext << " current - expect application to die." << std::endl << std::flush;
+        }
 
-		glGenFramebuffers(1, &instance->fb);
 
-		GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-		GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-
-		std::string VertexShaderCode = loadResource(instance, "Triangle.vertexshader");
-		std::string FragmentShaderCode = loadResource(instance, "Triangle.fragmentshader");
-		GLint Result = GL_FALSE;
-		int InfoLogLength;
-
-		// Compile Vertex Shader
-		char const* VertexSourcePointer = VertexShaderCode.c_str();
-		glShaderSource(VertexShaderID, 1, &VertexSourcePointer, NULL);
-		glCompileShader(VertexShaderID);
-
-		// Check Vertex Shader
-		glGetShaderiv(VertexShaderID, GL_COMPILE_STATUS, &Result);
-		glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-		if (InfoLogLength > 0) {
-			std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
-			glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
-			std::cout << (&VertexShaderErrorMessage[0]) << std::endl;
-		}
-
-		// Compile Fragment Shader
-		char const* FragmentSourcePointer = FragmentShaderCode.c_str();
-		glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer, NULL);
-		glCompileShader(FragmentShaderID);
-
-		// Check Fragment Shader
-		glGetShaderiv(FragmentShaderID, GL_COMPILE_STATUS, &Result);
-		glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-		if (InfoLogLength > 0) {
-			std::vector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
-			glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-			std::cout << &FragmentShaderErrorMessage[0] << std::endl;
-		}
-
-		// Link the program
-		std::cout << "Linking program" <<std::endl;
-		instance->program = glCreateProgram();
-		glAttachShader(instance->program, VertexShaderID);
-		glAttachShader(instance->program, FragmentShaderID);
-		glLinkProgram(instance->program);
-
-		// Check the program
-		glGetProgramiv(instance->program, GL_LINK_STATUS, &Result);
-		glGetProgramiv(instance->program, GL_INFO_LOG_LENGTH, &InfoLogLength);
-		if (InfoLogLength > 0) {
-			std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
-			glGetProgramInfoLog(instance->program, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-			std::cout << (&ProgramErrorMessage[0]) << std::endl;
-		}
-
-		glDetachShader(instance->program, VertexShaderID);
-		glDetachShader(instance->program, FragmentShaderID);
-
-		glDeleteShader(VertexShaderID);
-		glDeleteShader(FragmentShaderID);
-
-
-		instance->rotID = glGetUniformLocation(instance->program, "rot");
-
-
-		// vertex array
-		glGenVertexArrays(1, &instance->vaID);
-
-		static const Vertex data2[] = {
-			{  0.0f,   0.5f, 0.0f, {0.0f, 0.0f, 1.0f} },
-			{  0.45f, -0.5f, 0.0f, {0.0f, 1.0f, 0.0f} },
-			{ -0.45f, -0.5f, 0.0f, {1.0f, 0.0f, 0.0f} }
-		};
-
-		GLuint vboID;
-		glGenBuffers(1, &vboID);
-		glBindBuffer(GL_ARRAY_BUFFER, vboID);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(data2), data2, GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-		// build va
-		glBindVertexArray(instance->vaID);
-
-		glBindBuffer(GL_ARRAY_BUFFER, vboID);
-
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
-
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(GLfloat)));
-
-		glBindVertexArray(0);
-
-		instance->angle = 0;
+		
 	}
 
 	void afterLoop(RendererInstance* instance) {
-
+        std::cout << "afterLoop for " << instance << std::endl;
+        
+        delete instance->swapchain;
+        instance->swapchain = nullptr;
+        
 		glUseProgram(0);
 
 		glDeleteVertexArrays(1, &instance->vaID);
@@ -220,7 +238,7 @@ namespace SimpleTriangleSample {
 		cfg.imageCount = 2;
 		cfg.size = instance->renderer->getSize();
 		std::cout << " using size " << cfg.size.x << " / " << cfg.size.y << std::endl;
-		cfg.transferType = driftfx::StandardTransferTypes::MainMemory; //NVDXInterop;
+        cfg.transferType = instance->txType;
 
 		instance->swapchain = instance->renderer->createSwapchain(cfg);
 	}
@@ -228,7 +246,27 @@ namespace SimpleTriangleSample {
 	bool isSameSize(driftfx::Renderer* renderer, driftfx::Swapchain* swapchain) {
 		auto cfg = swapchain->getConfig();
 		auto surface = renderer->getSize();
-		return surface.x == cfg.size.x && surface.y == cfg.size.y;
+		auto result = surface.x == cfg.size.x && surface.y == cfg.size.y;
+        
+        if (!result) {
+            if (!result) {
+                std::cout << "Swapchain re-creation Reason: size: " << surface.x << ", " << surface.y << " vs " << cfg.size.x << ", " << cfg.size.y << std::endl;
+            }
+        }
+        
+        return result;
+	}
+
+	bool isSameTransferType(RendererInstance* instance) {
+		auto cfg = instance->swapchain->getConfig();
+        
+		auto result = instance->txType == cfg.transferType;
+        
+        if (!result) {
+            std::cout << "Swapchain re-creation Reason: transferType: " << instance->txType << " vs " << cfg.transferType << std::endl;
+        }
+        
+        return result;
 	}
 
 
@@ -289,7 +327,7 @@ namespace SimpleTriangleSample {
 	void onLoop(RendererInstance* instance) {
 		//std::cout << "onLoop" << std::endl;
 
-		if (instance->swapchain == nullptr || needsResize(instance)) {
+		if (instance->swapchain == nullptr || needsResize(instance) || !isSameTransferType(instance)) {
 			recreateSwapchain(instance);
 		}
 
@@ -399,19 +437,25 @@ namespace SimpleTriangleSample {
 
 
 	void start(RendererInstance* instance) {
-		instance->running = true;
-		instance->thread = std::thread(mainLoop, instance);
+        std::cout << "start for " << instance << std::endl;
+		instance->mutex.lock();
+		if (!instance->running) {
+			instance->running = true;
+            if (instance->thread != nullptr) {
+                std::cout << "tread->join()" << std::endl;
+                instance->thread->join();
+            }
+			instance->thread = new std::thread(mainLoop, instance);
+		}
+		instance->mutex.unlock();
 	}
 
 	void stop(RendererInstance* instance) {
+        std::cout << "stop for " << instance << std::endl;
 		instance->mutex.lock();
-		instance->running = false;
-		instance->mutex.unlock();
-		instance->thread.join();
+        instance->running = false;
+        instance->mutex.unlock();
 	}
-
-
-
 }
 
 extern "C" JNIEXPORT jlong JNICALL Java_org_eclipse_fx_drift_samples_cpp_SimpleTriangleSample_nInitialize(JNIEnv * env, jclass cls, jobject _renderer, jclass clazz) {
@@ -434,17 +478,27 @@ extern "C" JNIEXPORT void JNICALL Java_org_eclipse_fx_drift_samples_cpp_SimpleTr
 	delete instance;
 }
 
-extern "C" JNIEXPORT void JNICALL Java_org_eclipse_fx_drift_samples_cpp_SimpleTriangleSample_nStart(JNIEnv * env, jclass cls, jlong _instance) {
+extern "C" JNIEXPORT void JNICALL Java_org_eclipse_fx_drift_samples_cpp_SimpleTriangleSample_nStart(JNIEnv * env, jclass cls, jlong _instance, jobject _javaTransferType) {
 	auto instance = (SimpleTriangleSample::RendererInstance*)_instance;
 
-	std::cout << "nStart" << std::endl;
-
+	instance->txType = driftfx::getTransferType(env, _javaTransferType);
+	if(!instance->txType->isAvailable()) {
+		std::cout << "TransferMode " << instance->txType->getId() << " is not available!" << std::endl;
+		return;
+	}
+    
+	std::cout << "nStart" << instance << std::endl;
 	SimpleTriangleSample::start(instance);
 }
 
 extern "C" JNIEXPORT void JNICALL Java_org_eclipse_fx_drift_samples_cpp_SimpleTriangleSample_nStop(JNIEnv * env, jclass cls, jlong _instance) {
 	auto instance = (SimpleTriangleSample::RendererInstance*)_instance;
 
+	std::cout << "nStop" << instance << std::endl;
 	SimpleTriangleSample::stop(instance);
-	std::cout << "nStop" << std::endl;
+}
+
+extern "C" JNIEXPORT void JNICALL Java_org_eclipse_fx_drift_samples_cpp_SimpleTriangleSample_nInit(JNIEnv * env, jclass cls, jobject _classLoader) {
+	std::cout << "nInit " << _classLoader << std::endl;
+	driftfx::initialize(env, _classLoader);
 }

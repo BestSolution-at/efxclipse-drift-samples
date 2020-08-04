@@ -205,7 +205,9 @@ public class ObjDemo extends BorderPane {
 			t.start();
 		});
 		Button stop = new Button("stop");
-		stop.setOnAction(e -> alive = false);
+		stop.setOnAction(e -> {
+			alive = false;
+		});
 		
 		ComboBox<TransferType> txMode = new ComboBox<>();
 		txMode.getItems().addAll(StandardTransferTypes.MainMemory, StandardTransferTypes.NVDXInterop, StandardTransferTypes.IOSurface);
@@ -234,7 +236,6 @@ public class ObjDemo extends BorderPane {
 //		primaryStage.setOnCloseRequest(event -> {
 //			alive = false;
 //		});
-		
 		
 	}
 	
@@ -485,6 +486,9 @@ public class ObjDemo extends BorderPane {
     }
 
     void run() {
+    	if (alive) {
+    		return;
+    	}
     	alive = true;
         try {
             doInit();

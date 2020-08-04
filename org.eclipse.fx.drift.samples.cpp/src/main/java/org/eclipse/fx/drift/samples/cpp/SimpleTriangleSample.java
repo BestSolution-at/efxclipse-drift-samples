@@ -5,13 +5,15 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.eclipse.fx.core.IOUtils;
-import org.eclipse.fx.drift.DriftFX;
 import org.eclipse.fx.drift.DriftFXSurface;
 import org.eclipse.fx.drift.GLRenderer;
 import org.eclipse.fx.drift.Renderer;
+import org.eclipse.fx.drift.TransferType;
+import org.eclipse.fx.drift.StandardTransferTypes;
 import org.eclipse.fx.drift.util.NativeUtil;
 
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 
@@ -22,11 +24,13 @@ public class SimpleTriangleSample extends BorderPane {
 	private Renderer keepme;
 	
 	private long nativeRef;
+
+	private TransferType txType = StandardTransferTypes.MainMemory;
 	
 	public SimpleTriangleSample() {
-		DriftFX.useDriftCPP();
+
 		NativeUtil.loadLibrary(SimpleTriangleSample.class, "samples", System::loadLibrary, System::load);
-		
+		nInit(SimpleColorSample.class.getClassLoader());
 		
 		surface = new DriftFXSurface();
 		setCenter(surface);
@@ -35,28 +39,42 @@ public class SimpleTriangleSample extends BorderPane {
 		startButton.setOnAction(event -> start());
 		Button stopButton = new Button("stop");
 		stopButton.setOnAction(event -> stop());
-		setBottom(new HBox(startButton, stopButton));
+
+		ComboBox<TransferType> txMode = new ComboBox<>();
+		txMode.getItems().addAll(StandardTransferTypes.MainMemory, StandardTransferTypes.NVDXInterop, StandardTransferTypes.IOSurface);
+		txMode.setValue(txType);
+		txMode.valueProperty().addListener((obs, ov, nv) -> txType = nv);
+
+		setBottom(new HBox(startButton, stopButton, txMode));
+		
+		sceneProperty().addListener((obs, ov, nv) -> {
+			if (nv == null) {
+				if (nativeRef != 0) {
+					nDispose(nativeRef);
+					nativeRef = 0;
+				}
+			}
+		});
 	}
+
+	static native void nInit(ClassLoader classLoader);
 	
 	private void start() {
 		if (nativeRef == 0) {
-			nativeRef = nInitialize(keepme = GLRenderer.getRenderer(surface));
-			System.out.println("fyi: " + keepme.getSize().x);
-			nStart(nativeRef);
+			nativeRef = nInitialize(keepme = GLRenderer.getRenderer(surface), SimpleTriangleSample.class);
 		}
+		nStart(nativeRef, txType);
 	}
 	
 	private void stop() {
 		if (nativeRef != 0) {
 			nStop(nativeRef);
-			nDispose(nativeRef);
-			nativeRef = 0;
 		}
 	}
 	
-	private native long nInitialize(Renderer renderer);
+	private native long nInitialize(Renderer renderer, Class<?> clazz);
 	private native void nDispose(long nativeRef);
-	private native void nStart(long nativeRef);
+	private native void nStart(long nativeRef, TransferType transferType);
 	private native void nStop(long nativeRef);
 
 	public static String loadResource(String name) {

@@ -14,7 +14,7 @@ java {
 
 
 def isJava11() {
-	false //true
+	true
 }
 
 if (isJava11()) {

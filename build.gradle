@@ -90,13 +90,18 @@ task run11(type: JavaExec) {
 		'--add-opens', 'javafx.graphics/com.sun.prism.d3d=ALL-UNNAMED', 
 		'--add-opens', 'javafx.graphics/com.sun.prism.impl=ALL-UNNAMED'	
 	]
+
+
+	systemProperty "driftfx.use.java.library.path", System.getProperty("driftfx.use.java.library.path")
+    systemProperty "java.library.path", System.getProperty("java.library.path")
 }
 
 task run8(type: JavaExec) {
 	executable = "${System.getenv('JAVA_HOME_8')}/bin/java"
 	classpath = sourceSets.main.runtimeClasspath
 	main = 'org.eclipse.fx.drift.samples.DriftSamples'
-	
+	systemProperty "driftfx.use.java.library.path", System.getProperty("driftfx.use.java.library.path")
+    systemProperty "java.library.path", System.getProperty("java.library.path")
 }
 
 /*

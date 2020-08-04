@@ -13,7 +13,7 @@
 
 #include <minctx.h>
 
-#include <DriftFX/driftcpp.h>
+#include <driftcpp.h>
 
 
 namespace SimpleColorSample {
@@ -23,13 +23,14 @@ namespace SimpleColorSample {
 		jobject javaRenderer;
 		bool running;
 		std::mutex mutex;
-		std::thread thread;
+		std::thread* thread;
 
 		minctx::Context* glContext;
 
 		driftfx::Renderer* renderer;
 		driftfx::Swapchain* swapchain;
 
+		driftfx::TransferType* txType;
 
 		GLuint fb;
 
@@ -41,22 +42,34 @@ namespace SimpleColorSample {
 
 
 	void beforeLoop(RendererInstance* instance) {
-		std::cout << "trace beforeLoop" << std::endl;
+		std::cout << "beforeLoop for " << instance << std::endl;
 
 		instance->glContext = minctx::CreateContext(nullptr, 4, 2);
 
 		std::cout << "glContext = " << instance->glContext << std::endl;
 
-		bool res = minctx::MakeContextCurrent(instance->glContext);
-		std::cout << " context is set: " << res << std::endl;
-		std::cout << "my context = " << minctx::IsContextCurrent(instance->glContext) << std::endl;
-
-		glGenFramebuffers(1, &instance->fb);
+		bool contextIsCurrent = minctx::MakeContextCurrent(instance->glContext);
+        
+        if (contextIsCurrent) {
+            if (GLEW_OK == glewInit()) {
+                
+                glGenFramebuffers(1, &instance->fb);
+                
+                
+            } else {
+                std::cerr << "Failed to initialize glew - exect application to die." << std::endl << std::flush;
+            }
+        } else {
+            std::cerr << "Failed to make opengl context " << instance->glContext << " current - expect application to die." << std::endl << std::flush;
+        }
 	}
 
 	void afterLoop(RendererInstance* instance) {
-		std::cout << "trace afterLoop" << std::endl;
+		std::cout << "afterLoop for " << instance << std::endl;
 	
+        delete instance->swapchain;
+        instance->swapchain = nullptr;
+        
 		glDeleteFramebuffers(1, &instance->fb);
 
 		minctx::DestroyContext(instance->glContext);
@@ -64,7 +77,7 @@ namespace SimpleColorSample {
 	}
 
 	void recreateSwapchain(RendererInstance* instance) {
-		std::cout << "trace recreateSwapchain" << std::endl;
+		std::cout << "recreateSwapchain for " << instance << std::endl;
 		if (instance->swapchain != nullptr) {
 			delete instance->swapchain;
 			instance->swapchain = nullptr;
@@ -74,7 +87,8 @@ namespace SimpleColorSample {
 		cfg.imageCount = 2;
 		cfg.size = instance->renderer->getSize();
 		std::cout << " using size " << cfg.size.x << " / " << cfg.size.y << std::endl;
-		cfg.transferType = driftfx::StandardTransferTypes::NVDXInterop;
+		std::cout << " using txmode " << instance->txType->getId() << std::endl;
+		cfg.transferType = instance->txType;
 
 		instance->swapchain = instance->renderer->createSwapchain(cfg);
 	}
@@ -141,10 +155,7 @@ namespace SimpleColorSample {
 	}
 
 	void onLoop(RendererInstance* instance) {
-		std::cout << "trace onLoop" << std::endl;
-		//std::cout << "onLoop" << std::endl;
-
-		if (instance->swapchain == nullptr || needsResize(instance)) {
+		if (instance->swapchain == nullptr || needsResize(instance) || instance->txType != instance->swapchain->getConfig().transferType) {
 			recreateSwapchain(instance);
 		}
 
@@ -243,16 +254,25 @@ namespace SimpleColorSample {
 	}
 
 
-	void start(RendererInstance* instance) {
-		instance->running = true;
-		instance->thread = std::thread(mainLoop, instance);
-	}
+    void start(RendererInstance* instance) {
+        std::cout << "start for " << instance << std::endl;
+        instance->mutex.lock();
+        if (!instance->running) {
+            instance->running = true;
+            if (instance->thread != nullptr) {
+                std::cout << "tread->join()" << std::endl;
+                instance->thread->join();
+            }
+            instance->thread = new std::thread(mainLoop, instance);
+        }
+        instance->mutex.unlock();
+    }
 
 	void stop(RendererInstance* instance) {
+        std::cout << "stop for " << instance << std::endl;
 		instance->mutex.lock();
 		instance->running = false;
-		instance->mutex.unlock();
-		instance->thread.join();
+        instance->mutex.unlock();
 	}
 }
 
@@ -276,8 +296,17 @@ extern "C" JNIEXPORT void JNICALL Java_org_eclipse_fx_drift_samples_cpp_SimpleCo
 	delete instance;
 }
 
-extern "C" JNIEXPORT void JNICALL Java_org_eclipse_fx_drift_samples_cpp_SimpleColorSample_nStart(JNIEnv * env, jclass cls, jlong _instance) {
+extern "C" JNIEXPORT void JNICALL Java_org_eclipse_fx_drift_samples_cpp_SimpleColorSample_nStart(JNIEnv * env, jclass cls, jlong _instance, jobject _javaTransferType) {
 	auto instance = (SimpleColorSample::RendererInstance*)_instance;
+
+	instance->txType = driftfx::getTransferType(env, _javaTransferType);
+
+	std::cout << "using txmode " << instance->txType->getId() << std::endl;
+
+	if(!instance->txType->isAvailable()) {
+		std::cout << "TransferMode " << instance->txType->getId() << " is not available!" << std::endl;
+		return;
+	}
 
 	std::cout << "nStart" << std::endl;
 
@@ -289,4 +318,9 @@ extern "C" JNIEXPORT void JNICALL Java_org_eclipse_fx_drift_samples_cpp_SimpleCo
 
 	SimpleColorSample::stop(instance);
 	std::cout << "nStop" << std::endl;
+}
+
+extern "C" JNIEXPORT void JNICALL Java_org_eclipse_fx_drift_samples_cpp_SimpleColorSample_nInit(JNIEnv * env, jclass cls, jobject _classLoader) {
+	std::cout << "nInit " << _classLoader << std::endl;
+	driftfx::initialize(env, _classLoader);
 }

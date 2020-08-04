@@ -8,6 +8,8 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 
+#include <iostream>
+
 namespace minctx {
 	struct CGLContext : Context {
 		CGLContextObj contextObj;
@@ -81,7 +83,7 @@ bool minctx::MakeContextCurrent(minctx::Context* context) {
 
 bool minctx::IsContextCurrent(minctx::Context* context) {
     auto ctx = (minctx::CGLContext*) context;
-    return CGLGetCurrentContext() == ctx->contxtObj;
+    return CGLGetCurrentContext() == ctx->contextObj;
 }
 
 void* minctx::GetNativeContextHandle(minctx::Context* context) {

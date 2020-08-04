@@ -12,6 +12,25 @@ java {
 	targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+import org.gradle.internal.os.OperatingSystem
+def os = "macos"
+def libDebugLib = file(OperatingSystem.current().getSharedLibraryName("../org.eclipse.fx.drift.samples.cpp.native/build/lib/main/debug/$os/samples"))
+def libReleaseLib = file(OperatingSystem.current().getSharedLibraryName("../org.eclipse.fx.drift.samples.cpp.native/build/lib/main/release/$os/samples"))
+
+task showLibs() {
+	doLast {
+		println OperatingSystem.current().familyName
+		println libDebugLib
+		println libReleaseLib
+	}
+}
+
+task copyDebugLib(type: Copy) {
+	//project(':org.eclipse.fx.drift.samples.cpp.native')
+	from libDebugLib
+	into file('src/main/resources/native')
+}
+
 def isJava11() {
 	true
 }
