@@ -3,14 +3,29 @@
 This repo contains samples for DriftFX. 
 
 
-### Usage
+## Usage
 
 To simple start the samples use gradle:
+
+### Java 8
+
+TBD
+
+### Java 11
+
+#### OS-X/Linux
+
 ```
-gradle run
+export JAVA_HOME=/path/to/your/jdk-11
+export JAVA_HOME_11=$JAVA_HOME
+gradle run11
 ```
 
-#### Java 11 Notes
+#### Windows
+
+TBD
+
+## Java 11 Notes
 
 eclipse VM arguments
 
