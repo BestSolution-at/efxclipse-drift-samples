@@ -2,6 +2,15 @@
 
 This repo contains samples for DriftFX. 
 
+## Contents
+
+ * Native code (C++) Samples using the driftcpp api    
+   see `org.eclipse.fx.drift.samples.cpp` and `org.eclipse.fx.drift.samples.cpp.native`
+ * Pure Java Samples using lwjgl    
+   see `org.eclipse.fx.drift.samples.lwjgl`
+   
+## Contributions
+If you create a sample which uses drift feel free to contribute it to this repo. We are happy to add all kinds of samples which use drift to render to java fx. ;-)
 
 ## Usage
 
