@@ -125,13 +125,14 @@ import org.lwjgl.system.Configuration;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 
 public class ObjDemo extends BorderPane {
 
-	private final DriftFXSurface surface;
+	private final DriftFXSurface surface; 
     int width = 1024;
     int height = 768;
     
@@ -174,6 +175,7 @@ public class ObjDemo extends BorderPane {
 //    GLFWScrollCallback sCallback;
     Callback debugProc;
 
+    private boolean autoRotate = false;
 	
 	private boolean alive;
 	
@@ -184,9 +186,9 @@ public class ObjDemo extends BorderPane {
 	
 	public ObjDemo() {
 		// lwjgl cfg
-		Configuration.DEBUG.set(true);
-		Configuration.DEBUG_FUNCTIONS.set(false);
-		Configuration.DEBUG_STREAM.set(System.err);
+		//Configuration.DEBUG.set(true);
+		//Configuration.DEBUG_FUNCTIONS.set(false);
+		//Configuration.DEBUG_STREAM.set(System.err);
 		
 		
 		setBackground(null);
@@ -208,17 +210,21 @@ public class ObjDemo extends BorderPane {
 		stop.setOnAction(e -> {
 			alive = false;
 		});
+		CheckBox autoRot = new CheckBox("auto rotate");
+		autoRot.selectedProperty().addListener((obs, ol, ne) -> autoRotate = ne);
 		
 		ComboBox<TransferType> txMode = new ComboBox<>();
 		txMode.getItems().addAll(StandardTransferTypes.MainMemory, StandardTransferTypes.NVDXInterop, StandardTransferTypes.IOSurface);
 		txMode.setValue(txType);
 		txMode.valueProperty().addListener((obs, ov, nv) -> txType = nv);
 		
-		HBox buttons = new HBox(start, stop, txMode);
+		HBox buttons = new HBox(start, stop, txMode, autoRot);
 		setTop(buttons);
 		
 		surface.setOnMouseMoved(event -> {
-			rotation = ((float) event.getX() / width - 0.5f) * 2f * (float) Math.PI;
+			if (!autoRotate) {
+				rotation = ((float) event.getX() / width - 0.5f) * 2f * (float) Math.PI;
+			}
 		});
 		surface.setOnScroll(event -> {
 			 if (event.getDeltaY() < 0) {
@@ -265,7 +271,7 @@ public class ObjDemo extends BorderPane {
 //        if (!caps.GL_ARB_fragment_shader) {
 //            throw new AssertionError("This demo requires the ARB_fragment_shader extension.");
 //        }
-        debugProc = GLUtil.setupDebugMessageCallback();
+        //debugProc = GLUtil.setupDebugMessageCallback();
         
         glClearColor(0f, 0f, 0f, 0f);
         glEnable(GL_DEPTH_TEST);
@@ -387,6 +393,10 @@ public class ObjDemo extends BorderPane {
     }
 
     void update() {
+    	if (autoRotate) {
+    		rotation += 0.1;
+    	}
+    	
         projectionMatrix.setPerspective((float) Math.toRadians(fov), (float) width / height, 0.01f,
                 100.0f);
         viewPosition.set(10f * (float) Math.cos(rotation), 10f, 10f * (float) Math.sin(rotation));
@@ -434,55 +444,64 @@ public class ObjDemo extends BorderPane {
 				if (swapChain != null) {
 					swapChain.dispose();
 				}
+				try {
+					swapChain = renderer.createSwapchain(new SwapchainConfig(size, 2, PresentationMode.MAILBOX, txType));
+					
+					width = size.x;
+					height = size.y;
+					curTxType = txType;
+				} catch (Exception e) {
+					System.err.println("swapchain recreation failed! " + e.getMessage());
+					e.printStackTrace(System.err);
+				}
 				
-				swapChain = renderer.createSwapchain(new SwapchainConfig(size, 2, PresentationMode.MAILBOX, txType));
-				
-				width = size.x;
-				height = size.y;
-				curTxType = txType;
 			}
         	
             update();
             
-            try {
-	            RenderTarget target = swapChain.acquire();
-	    		
-	            int tex = GLRenderer.getGLTextureId(target);
-	    		int depthTex = glGenTextures();
-	    		glBindTexture(GL_TEXTURE_2D, depthTex);
-	    		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, (ByteBuffer)null);
-	            glBindTexture(GL_TEXTURE_2D, 0);
-	            
-	    		int fb = glGenFramebuffers();
-	    		
-	    		
-	    		glBindFramebuffer(GL_FRAMEBUFFER, fb);
-	    		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex, 0);
-	    		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTex, 0);
-	    		
-	    		int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	    		switch (status) {
-	    			case GL_FRAMEBUFFER_COMPLETE: break;
-	    			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: System.err.println("INCOMPLETE_ATTACHMENT!"); break;
-	    		}
-	    		
-	    		glViewport(0, 0, width, height);
-	    		render();
-	            
-	    		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	    		glDeleteFramebuffers(fb);
-	    		glDeleteTextures(depthTex);
-	            
-	            swapChain.present(target);
-	            //Thread.sleep(16);
-            }
-            catch (Exception e) {
-            	e.printStackTrace();
+            if (swapChain != null) {
+	            try {
+		            RenderTarget target = swapChain.acquire();
+		    		
+		            int tex = GLRenderer.getGLTextureId(target);
+		    		int depthTex = glGenTextures();
+		    		glBindTexture(GL_TEXTURE_2D, depthTex);
+		    		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, (ByteBuffer)null);
+		            glBindTexture(GL_TEXTURE_2D, 0);
+		            
+		    		int fb = glGenFramebuffers();
+		    		
+		    		
+		    		glBindFramebuffer(GL_FRAMEBUFFER, fb);
+		    		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex, 0);
+		    		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTex, 0);
+		    		
+		    		int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		    		switch (status) {
+		    			case GL_FRAMEBUFFER_COMPLETE: break;
+		    			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: System.err.println("INCOMPLETE_ATTACHMENT!"); break;
+		    		}
+		    		
+		    		glViewport(0, 0, width, height);
+		    		render();
+		            
+		    		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		    		glDeleteFramebuffers(fb);
+		    		glDeleteTextures(depthTex);
+		            
+		            swapChain.present(target);
+		            //Thread.sleep(16);
+	            }
+	            catch (Exception e) {
+	            	e.printStackTrace();
+	            }
             }
         }
         
-        swapChain.dispose();
-		swapChain = null;
+        if (swapChain != null) {
+        	swapChain.dispose();
+        	swapChain = null;
+        }
     }
 
     void run() {

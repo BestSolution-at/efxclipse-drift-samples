@@ -7,9 +7,11 @@ import java.nio.charset.StandardCharsets;
 import org.eclipse.fx.core.IOUtils;
 import org.eclipse.fx.drift.DriftFXSurface;
 import org.eclipse.fx.drift.GLRenderer;
+import org.eclipse.fx.drift.Placement;
 import org.eclipse.fx.drift.Renderer;
-import org.eclipse.fx.drift.TransferType;
 import org.eclipse.fx.drift.StandardTransferTypes;
+import org.eclipse.fx.drift.TransferType;
+import org.eclipse.fx.drift.samples.CommonControls;
 import org.eclipse.fx.drift.util.NativeUtil;
 
 import javafx.scene.control.Button;
@@ -28,11 +30,15 @@ public class SimpleTriangleSample extends BorderPane {
 	private TransferType txType = StandardTransferTypes.MainMemory;
 	
 	public SimpleTriangleSample() {
-
 		NativeUtil.loadLibrary(SimpleTriangleSample.class, "samples", System::loadLibrary, System::load);
 		nInit(SimpleColorSample.class.getClassLoader());
 		
 		surface = new DriftFXSurface();
+		
+//		surface.setMinSize(100, 100);
+//		surface.setMaxSize(500, 500);
+//		surface.setPrefSize(300, 300);
+		
 		setCenter(surface);
 		
 		Button startButton = new Button("start");
@@ -40,12 +46,13 @@ public class SimpleTriangleSample extends BorderPane {
 		Button stopButton = new Button("stop");
 		stopButton.setOnAction(event -> stop());
 
-		ComboBox<TransferType> txMode = new ComboBox<>();
-		txMode.getItems().addAll(StandardTransferTypes.MainMemory, StandardTransferTypes.NVDXInterop, StandardTransferTypes.IOSurface);
-		txMode.setValue(txType);
+		ComboBox<TransferType> txMode = CommonControls.createTransferModeComboBox(true);
 		txMode.valueProperty().addListener((obs, ov, nv) -> txType = nv);
 
-		setBottom(new HBox(startButton, stopButton, txMode));
+		ComboBox<Placement> placement = CommonControls.createPlacementComboBox();
+		surface.placementStrategyProperty().bind(placement.valueProperty());
+		
+		setBottom(new HBox(startButton, stopButton, txMode, placement));
 		
 		sceneProperty().addListener((obs, ov, nv) -> {
 			if (nv == null) {

@@ -3,8 +3,8 @@ package org.eclipse.fx.drift.samples.cpp;
 import org.eclipse.fx.drift.DriftFXSurface;
 import org.eclipse.fx.drift.GLRenderer;
 import org.eclipse.fx.drift.Renderer;
-import org.eclipse.fx.drift.TransferType;
 import org.eclipse.fx.drift.StandardTransferTypes;
+import org.eclipse.fx.drift.TransferType;
 import org.eclipse.fx.drift.util.NativeUtil;
 
 import javafx.scene.control.Button;
@@ -23,7 +23,6 @@ public class SimpleColorSample extends BorderPane {
 	private TransferType txType = StandardTransferTypes.MainMemory;
 	
 	public SimpleColorSample() {
-
 		NativeUtil.loadLibrary(SimpleTriangleSample.class, "samples", System::loadLibrary, System::load);
 		nInit(SimpleColorSample.class.getClassLoader());
 		
@@ -40,7 +39,17 @@ public class SimpleColorSample extends BorderPane {
 		txMode.setValue(txType);
 		txMode.valueProperty().addListener((obs, ov, nv) -> txType = nv);
 
-		setBottom(new HBox(startButton, stopButton, txMode));
+		Button output = new Button("output");
+		output.setOnAction(e -> {
+			if (keepme == null) return;
+			
+			System.err.println("getSize(): " + keepme.getSize());
+			System.err.println("getLogicalSize(): " + keepme.getLogicalSize());
+			System.err.println("getScreenScale(): " + keepme.getScreenScale());
+			System.err.println("getUserScale(): " + keepme.getUserScale());
+		});
+		
+		setBottom(new HBox(startButton, stopButton, txMode, output));
 		
 		sceneProperty().addListener((obs, ov, nv) -> {
 			if (nv == null) {

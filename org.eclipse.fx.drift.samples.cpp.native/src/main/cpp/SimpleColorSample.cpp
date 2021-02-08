@@ -227,6 +227,15 @@ namespace SimpleColorSample {
 		
 		instance->renderer = driftfx::initializeRenderer(env, instance->javaRenderer);
 
+		auto size = instance->renderer->getSize();
+		std::cout << "* Renderer#getSize(): " << size.x << " / " << size.y << std::endl;
+		auto logicalSize = instance->renderer->getLogicalSize();
+		std::cout << "* Renderer#getLogicalSize(): " << logicalSize.x << " / " << logicalSize.y << std::endl;
+		auto screenScale = instance->renderer->getScreenScale();
+		std::cout << "* Renderer#getScreenScale(): " << screenScale.x << " / " << screenScale.y << std::endl;
+		auto userScale = instance->renderer->getUserScale();
+		std::cout << "* Renderer#getUserScale(): " << userScale.x << " / " << userScale.y << std::endl;
+
 		beforeLoop(instance);
 
 		while (instance->running) {
