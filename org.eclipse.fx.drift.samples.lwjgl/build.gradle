@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id "biz.aQute.bnd.builder"
     id 'eclipse'
-    
+
     id 'org.openjfx.javafxplugin'
     
 }
@@ -12,19 +12,18 @@ java {
 	targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-def isJava11() {
-	true
+javafx {
+	version = "11.0.2"
+	modules = [ 'javafx.controls' ]
 }
 
-if (isJava11()) {
-
-	javafx {
-		version = "11.0.2"
-		modules = [ 'javafx.controls' ]
-	}
-	
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+    options.compilerArgs.addAll("--release", "8")
+	options.encoding = 'UTF-8'
+	options.fork = true
 }
-    
 
 project.ext.lwjglVersion = '3.2.0'
 
@@ -44,6 +43,10 @@ switch (OperatingSystem.current()) {
 
 dependencies {
     api 'org.eclipse.fx:org.eclipse.fx.drift:999.0.0-SNAPSHOT'
+
+//    api 'org.eclipse.fx:org.eclipse.fx.drift:1.0.0.rc2'
+//    api files('../../efxclipse-drift/build/libs/org.eclipse.fx.drift.jar')
+    
     api project(':org.eclipse.fx.drift.samples')
 
     api 'org.osgi:org.osgi.service.component.annotations:1.3.0'
@@ -55,8 +58,6 @@ dependencies {
 	runtimeOnly "org.lwjgl:lwjgl-assimp:$lwjglVersion:$lwjglNatives"
 	runtimeOnly "org.lwjgl:lwjgl-opengl:$lwjglVersion:$lwjglNatives"
 
-
-    
     implementation 'org.joml:joml:1.9.22'
 
 /*
