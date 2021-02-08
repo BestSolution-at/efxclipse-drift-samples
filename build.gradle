@@ -1,8 +1,17 @@
+buildscript {
+	// this allows us to disable some tasks
+	def unwantedTasks = [ 'run' ]
+	tasks.whenTaskAdded {task ->
+		if (unwantedTasks.contains(task.name)) {
+			task.enabled = false
+		}
+	}
+}
+
 plugins {
     id 'application'
     //id "com.athaydes.osgi-run" version "1.6.0"
     id 'org.openjfx.javafxplugin'
-    
 }
 
 
@@ -69,6 +78,9 @@ dependencies {
 
 
 task run11(type: JavaExec) {
+	group = 'application'
+	description = 'Runs this project as Java 11 application'
+	
 	executable = "${System.getenv('JAVA_HOME_11')}/bin/java"
 	def modules = sourceSets.main.runtimeClasspath.filter { jar -> jar.getName().contains('javafx-') } .getAsPath()
 	classpath = sourceSets.main.runtimeClasspath
@@ -93,10 +105,14 @@ task run11(type: JavaExec) {
 
 
 	systemProperty "driftfx.use.java.library.path", System.getProperty("driftfx.use.java.library.path")
-    systemProperty "java.library.path", System.getProperty("java.library.path")
+	systemProperty "java.library.path", System.getProperty("java.library.path")
+	systemProperty "driftfx.loglevel", System.getProperty("driftfx.loglevel")
 }
 
 task run8(type: JavaExec) {
+	group = 'application'
+	description = 'Runs this project as Java 8 application'
+
 	executable = "${System.getenv('JAVA_HOME_8')}/bin/java"
 	classpath = sourceSets.main.runtimeClasspath
 	main = 'org.eclipse.fx.drift.samples.DriftSamples'
