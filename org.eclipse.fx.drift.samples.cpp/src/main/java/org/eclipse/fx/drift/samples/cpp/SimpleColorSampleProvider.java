@@ -1,5 +1,8 @@
 package org.eclipse.fx.drift.samples.cpp;
 
+import java.net.URL;
+import java.util.Optional;
+
 import org.eclipse.fx.drift.samples.IDriftFXSampleProvider;
 import org.osgi.service.component.annotations.Component;
 
@@ -18,4 +21,8 @@ public class SimpleColorSampleProvider implements IDriftFXSampleProvider {
 		return new SimpleColorSample();
 	}
 
+	@Override
+	public Optional<URL> getPreviewImage() {
+		return Optional.of(SimpleColorSampleProvider.class.getResource("SimpleColorSample.png"));
+	}
 }

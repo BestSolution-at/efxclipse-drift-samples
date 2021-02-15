@@ -54,11 +54,16 @@ dependencies {
 	implementation "org.lwjgl:lwjgl:$lwjglVersion"
 	implementation "org.lwjgl:lwjgl-assimp:$lwjglVersion"
 	implementation "org.lwjgl:lwjgl-opengl:$lwjglVersion"
+	implementation "org.lwjgl:lwjgl-stb:$lwjglVersion"
+	
 	runtimeOnly "org.lwjgl:lwjgl:$lwjglVersion:$lwjglNatives"
 	runtimeOnly "org.lwjgl:lwjgl-assimp:$lwjglVersion:$lwjglNatives"
 	runtimeOnly "org.lwjgl:lwjgl-opengl:$lwjglVersion:$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-stb:$lwjglVersion:$lwjglNatives"
 
     implementation 'org.joml:joml:1.9.22'
+    
+    implementation 'at.bestsolution.efxclipse.rt:org.eclipse.fx.core:3.6.0.201907240201'
 
 /*
     implementation "org.lwjgl.osgi:org.lwjgl.lwjgl:$lwjglVersion"

@@ -1,5 +1,8 @@
 package org.eclipse.fx.drift.samples.lwjgl;
 
+import java.net.URL;
+import java.util.Optional;
+
 import org.eclipse.fx.drift.samples.IDriftFXSampleProvider;
 import org.osgi.service.component.annotations.Component;
 
@@ -16,6 +19,11 @@ public class WavefrontObjDemoProvider implements IDriftFXSampleProvider {
 	@Override
 	public Node createInstance() {
 		return new ObjDemo();
+	}
+	
+	@Override
+	public Optional<URL> getPreviewImage() {
+		return Optional.of(WavefrontObjDemoProvider.class.getResource("WavefrontObjDemo.png"));
 	}
 
 }
