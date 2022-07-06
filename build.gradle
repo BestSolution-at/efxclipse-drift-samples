@@ -163,6 +163,9 @@ def setupJavaTasks(version, os, arch, bit, type, fx, ext) {
   createRunTasks(details)
 }
 
+import java.nio.file.FileSystems
+import java.nio.file.Files
+
 def createJDKTasks(details) {
 
   def version = "${details.java_version[0]}"
@@ -215,6 +218,22 @@ def createJDKTasks(details) {
     if ("tar.gz" == details.ext) {
       from tarTree(resources.gzip(tasks.named(downloadTaskName).get().dest))
     }
+
+    // copy symlinks
+    eachFile { fileSpec ->
+      def sourcePath = FileSystems.getDefault().getPath(fileSpec.file.path)
+      if (Files.isSymbolicLink(sourcePath)) {
+        fileSpec.exclude()
+        def destinationPath = Paths.get("${destinationDir}/${fileSpec.relativePath}")
+        if (Files.notExists(destinationPath)) {
+          project.mkdir destinationPath.parent
+        }
+        project.exec {
+          commandLine 'ln', '-s', Files.readSymbolicLink(sourcePath), destinationPath
+        }
+      }
+    }
+
   }
   tasks.register(requireTaskName, RequireJavaTask) {
     group = 'Java Setup'

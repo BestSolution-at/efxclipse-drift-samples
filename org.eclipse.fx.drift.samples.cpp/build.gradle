@@ -11,23 +11,21 @@ java {
 }
 
 import org.gradle.internal.os.OperatingSystem
-def os = OperatingSystem.current().familyName
-def libDebugLib = file(OperatingSystem.current().getSharedLibraryName("../org.eclipse.fx.drift.samples.cpp.native/build/lib/main/debug/$os/samples"))
-def libReleaseLib = file(OperatingSystem.current().getSharedLibraryName("../org.eclipse.fx.drift.samples.cpp.native/build/lib/main/release/$os/samples"))
-
-task showLibs() {
-  dependsOn ':org.eclipse.fx.drift.samples.cpp.native:build'
-	doLast {
-		println OperatingSystem.current().familyName
-		println libDebugLib
-		println libReleaseLib
-	}
-}
 
 task copyDebugLib(type: Copy) {
-  dependsOn ':org.eclipse.fx.drift.samples.cpp.native:build'
-	from libDebugLib
+  dependsOn ':org.eclipse.fx.drift.samples.cpp.native:assemble'
+
+  project(':org.eclipse.fx.drift.samples.cpp.native').tasks.withType(LinkSharedLibrary) {
+    if (it.name.contains('Debug')) {
+      from (it.outputs.files.asFileTree) {
+        include "**/*${OperatingSystem.current().getSharedLibrarySuffix()}"
+      }
+    }
+  }
+
 	into file('src/main/resources/native')
+
+  eachFile { println " copy native $it"}
 }
 
 javafx {
