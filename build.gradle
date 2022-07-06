@@ -12,21 +12,15 @@ plugins {
     id 'application'
     //id "com.athaydes.osgi-run" version "1.6.0"
     id 'org.openjfx.javafxplugin'
+    id "de.undercouch.download" version "5.1.0"
 }
 
+configure(subprojects) { subproject -> 
 
-def isJava11() {
-	true
+  println "Subproject: $subproject.name"
+
 }
 
-if (isJava11()) {
-
-	javafx {
-		version = "11.0.2"
-		modules = [ 'javafx.controls' ]
-	}
-	
-}
 
 repositories {
     mavenCentral()
@@ -72,6 +66,226 @@ dependencies {
     //osgiRuntime project(':org.eclipse.fx.drift.samples')
     //osgiRuntime project(':org.eclipse.fx.drift.samples.lwjgl')
     //osgiRuntime project(':org.eclipse.fx.drift.samples.cpp')
+}
+
+
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+class ZuluApi {
+
+  static def zuluBase = 'https://api.azul.com/zulu/download/community/v1.0'
+  static def toGetParams = {
+    it.collect { "$it.key=$it.value" } join "&"
+  }
+
+  // version 
+  // os (linux, linux_musl, macos, windows, solaris, qnx)
+  // arch (x86, arm, mips, ppc, sparcv9)
+  // hw_bitness (64, 32)
+  // bundle_type (jdk, jre)
+  static def getBundles(version, os, arch, bitness, bundle_type, javafx, ext) {
+    def service = "$zuluBase/bundles/"
+    def params = [
+      java_version: version,
+      os: os,
+      arch: arch,
+      hw_bitness: bitness,
+      bundle_type: bundle_type,
+      release_status: "ga",
+      support_term: "lts",
+      latest: "true",
+      javafx: javafx,
+      ext: ext
+    ]
+    def req = new URL("$service?${toGetParams(params)}").openConnection()
+    req.setRequestMethod("GET")
+    req.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+    req.setDoOutput(true)
+    //req.getOutputStream().write(JsonOutput.toJson(body).getBytes("UTF-8"))
+    //println req.getResponseCode()
+    //logger.quiet("Status code: ${req.getResponseCode()}") // HTTP request done on first read
+    def respText = req.getInputStream().getText();
+    def resp = new JsonSlurper().parseText(respText)
+    //logger.quiet("Response: ${resp}")
+    //println JsonOutput.prettyPrint(respText)
+    //println resp.size()
+
+    assert resp.size() == 1
+
+    return resp[0]
+  }
+  
+  static def getDetails(id) {
+    def service = "$zuluBase/bundles/$id"
+    def req = new URL("$service").openConnection()
+    req.setRequestMethod("GET")
+    req.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+    req.setDoOutput(true)
+    //req.getOutputStream().write(JsonOutput.toJson(body).getBytes("UTF-8"))
+    //println req.getResponseCode()
+    //logger.quiet("Status code: ${req.getResponseCode()}") // HTTP request done on first read
+    def respText = req.getInputStream().getText();
+    def resp = new JsonSlurper().parseText(respText)
+    //logger.quiet("Response: ${resp}")
+    //println JsonOutput.prettyPrint(respText)
+
+    return resp
+  }
+
+}
+
+
+// linux
+setupJavaTasks("8", "linux", "x86", "64", "jre", "true", "tar.gz")
+setupJavaTasks("11", "linux", "x86", "64", "jre", "false", "tar.gz")
+setupJavaTasks("17", "linux", "x86", "64", "jre", "false", "tar.gz")
+
+// windows
+setupJavaTasks("8", "windows", "x86", "64", "jre", "true", "zip")
+setupJavaTasks("11", "windows", "x86", "64", "jre", "false", "zip")
+setupJavaTasks("17", "windows", "x86", "64", "jre", "false", "zip")
+
+// macos
+setupJavaTasks("8", "macos", "x86", "64", "jre", "true", "tar.gz")
+setupJavaTasks("11", "macos", "x86", "64", "jre", "false", "tar.gz")
+setupJavaTasks("17", "macos", "x86", "64", "jre", "false", "tar.gz")
+
+// macos arm
+setupJavaTasks("8", "macos", "arm", "64", "jre", "true", "tar.gz")
+setupJavaTasks("11", "macos", "arm", "64", "jre", "false", "tar.gz")
+setupJavaTasks("17", "macos", "arm", "64", "jre", "false", "tar.gz")
+
+
+def setupJavaTasks(version, os, arch, bit, type, fx, ext) {
+  def bundle = ZuluApi.getBundles(version, os, arch, bit, type, fx, ext)
+  def details = ZuluApi.getDetails(bundle.id)
+  createJDKTasks(details)
+  createRunTasks(details)
+}
+
+def createJDKTasks(details) {
+
+  def version = "${details.java_version[0]}"
+  def os = "$details.os"
+  def arch = "$details.arch"
+  def bit = "$details.hw_bitness"
+
+  def qualifier = "${details.javafx ? 'fx-' : ''}$version-$os-${arch}_$bit"
+
+  def downloadTarget = new File(buildDir, "/download")
+  def extractTarget = new File(buildDir, "/java")
+
+  def url = details.url
+  def type = details.ext
+  def name = details.name.replaceAll("[.]$type", "")
+
+  def downloadTaskName = "downloadJava-$qualifier"
+  def verifyTaskName = "verifyJava-$qualifier"
+  def extractTaskName = "extractJava-$qualifier"
+  def requireTaskName = "requireJava-$qualifier"
+  def showVersionTaskName = "showJavaVersion-$qualifier"
+
+  tasks.register(downloadTaskName, Download) {
+    //group = 'Java Setup'
+    //description = 'Downloads a Java'
+    src url
+    dest new File(downloadTarget, "${name}.$type")
+    overwrite false
+  }
+  tasks.register(verifyTaskName, Verify) {
+    //group = 'Java Setup'
+    //description = 'Verifies a Java download'
+    dependsOn tasks.named(downloadTaskName)
+
+    src tasks.named(downloadTaskName).get().dest
+    algorithm 'MD5'
+    checksum details.md5_hash
+  }
+  tasks.register(extractTaskName, Copy) {
+    //group = 'Java Setup'
+    //description = 'Extracts a Java'
+    dependsOn tasks.named(downloadTaskName)
+    dependsOn tasks.named(verifyTaskName)
+
+    into extractTarget
+
+    if ("zip" == details.ext) {
+      from zipTree(tasks.named(downloadTaskName).get().dest)
+    }
+    if ("tar.gz" == details.ext) {
+      from tarTree(resources.gzip(tasks.named(downloadTaskName).get().dest))
+    }
+  }
+  tasks.register(requireTaskName, RequireJavaTask) {
+    group = 'Java Setup'
+    description = 'Provides a Java home and executable path'
+    dependsOn tasks.named(extractTaskName)
+    javaHome = new File(extractTarget, "/$name")
+  }
+  tasks.register(showVersionTaskName, JavaExec) {
+    group = 'Java Setup'
+    description = 'Shows a Java version'
+    dependsOn tasks.named(requireTaskName)
+
+    executable = tasks.named(requireTaskName).get().javaBinary.get()
+    main = "Dummy"
+    jvmArgs = [ "-version" ]
+  }
+}
+
+abstract class RequireJavaTask extends DefaultTask {
+  @Input
+  abstract Property<File> getJavaHome()
+  @Internal
+  abstract Provider<File> javaBinary = javaHome.map { new File(it, "/bin/java") }
+}
+
+def createRunTasks(details) {
+  def version = "${details.java_version[0]}"
+  def os = "$details.os"
+  def arch = "$details.arch"
+  def bit = "$details.hw_bitness"
+
+  def qualifier = "${details.javafx ? 'fx-' : ''}$version-$os-${arch}_$bit"
+ 
+  def requireTaskName = "requireJava-$qualifier"
+
+  tasks.register("run-$qualifier", JavaExec) {
+    group = 'Application'
+    description = "Runs the demo on $qualifier"
+    dependsOn tasks.named(requireTaskName)
+
+    executable = tasks.named(requireTaskName).get().javaBinary.get()
+
+    main = 'org.eclipse.fx.drift.samples.DriftSamples'
+    classpath = sourceSets.main.runtimeClasspath
+
+    if (details.java_version[0] >= 9) {
+      def modules = sourceSets.main.runtimeClasspath.filter { jar -> jar.getName().contains('javafx-') } .getAsPath()
+      jvmArgs = [
+        '--module-path', modules,
+        '--add-modules', 'javafx.controls',
+        '--add-exports', 'javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED',
+        '--add-exports', 'javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED', 
+        '--add-exports', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED', 
+        '--add-exports', 'javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED', 
+        '--add-exports', 'javafx.graphics/com.sun.javafx.geom=ALL-UNNAMED', 
+        '--add-exports', 'javafx.graphics/com.sun.javafx.geom.transform=ALL-UNNAMED', 
+        '--add-exports', 'javafx.graphics/com.sun.javafx.scene.text=ALL-UNNAMED', 
+        '--add-exports', 'javafx.graphics/com.sun.javafx.font=ALL-UNNAMED', 
+        '--add-exports', 'javafx.graphics/com.sun.prism.paint=ALL-UNNAMED', 
+        '--add-opens', 'javafx.graphics/com.sun.prism=ALL-UNNAMED',
+        '--add-opens', 'javafx.graphics/com.sun.prism.es2=ALL-UNNAMED', 
+        '--add-opens', 'javafx.graphics/com.sun.prism.d3d=ALL-UNNAMED', 
+        '--add-opens', 'javafx.graphics/com.sun.prism.impl=ALL-UNNAMED'	
+      ]
+    }
+
+    systemProperty "driftfx.showfps", true
+    systemProperty "driftfx.use.java.library.path", System.getProperty("driftfx.use.java.library.path")
+    systemProperty "java.library.path", System.getProperty("java.library.path")
+    systemProperty "driftfx.loglevel", System.getProperty("driftfx.loglevel")
+  }
 }
 
 task runPlayer(type: JavaExec) {
@@ -133,7 +347,7 @@ task run11(type: JavaExec) {
 		'--add-opens', 'javafx.graphics/com.sun.prism.impl=ALL-UNNAMED'	
 	]
 
-
+  systemProperty "driftfx.showfps", true
 	systemProperty "driftfx.use.java.library.path", System.getProperty("driftfx.use.java.library.path")
 	systemProperty "java.library.path", System.getProperty("java.library.path")
 	systemProperty "driftfx.loglevel", System.getProperty("driftfx.loglevel")

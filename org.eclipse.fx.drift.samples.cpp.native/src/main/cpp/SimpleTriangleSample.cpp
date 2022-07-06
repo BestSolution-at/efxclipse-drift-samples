@@ -93,7 +93,7 @@ namespace SimpleTriangleSample {
 	}
 
 	void beforeLoop(RendererInstance* instance) {
-        std::cout << "beforeLoop for " << instance << std::endl;
+    std::cout << "beforeLoop for " << instance << std::endl;
 		instance->glContext = minctx::CreateContext(nullptr, 4, 2);
 
 		std::cout << "glContext = " << instance->glContext << std::endl;

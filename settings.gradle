@@ -10,10 +10,11 @@ rootProject.name = 'driftfx-samples-root'
 
 include 'org.eclipse.fx.drift.samples'
 include 'org.eclipse.fx.drift.samples.lwjgl'
-include 'org.eclipse.fx.drift.samples.cpp'
 include 'org.eclipse.fx.drift.samples.cpp.native'
+include 'org.eclipse.fx.drift.samples.cpp'
 
 include ':libs:glew'
 include ':libs:minctx'
+
 
 //include ':osgi'

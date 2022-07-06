@@ -7,6 +7,29 @@ def getFrameworkHeaderPath(framework) {
     "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/${framework}.framework/Headers"
 }
 
+model {
+  toolChains {
+    visualStudio(VisualCpp) {}
+    gcc(Gcc) {}
+    clang(Clang) {
+      eachPlatform {
+        cppCompiler.withArguments { args ->
+          args << '-arch'
+          args << 'x86_64'
+          args << '-arch'
+          args << 'arm64'
+        }
+        linker.withArguments { args ->
+          args << '-arch'
+          args << 'x86_64'
+          args << '-arch'
+          args << 'arm64'
+        }
+      }
+    }
+  }
+}
+
 library {
     baseName = 'samples'
     dependencies {
@@ -18,7 +41,7 @@ library {
     targetMachines = [
       machines.linux.x86_64,
       machines.windows.x86_64,
-      machines.macOS.x86_64
+      machines.macOS.x86_64,
     ]
 
     privateHeaders {
@@ -82,3 +105,4 @@ def addJNIIncludes(compileTask) {
   compileTask.includes(includeDir)
   compileTask.includes(platformIncludeDir)
 }
+

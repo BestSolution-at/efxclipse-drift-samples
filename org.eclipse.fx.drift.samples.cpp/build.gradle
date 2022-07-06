@@ -1,11 +1,9 @@
 plugins {
     id 'java-library'
     id "biz.aQute.bnd.builder"
-    id 'eclipse'
-    
-        id 'org.openjfx.javafxplugin'
-    
+    id 'org.openjfx.javafxplugin'
 }
+
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_1_8
@@ -13,11 +11,12 @@ java {
 }
 
 import org.gradle.internal.os.OperatingSystem
-def os = "macos"
+def os = OperatingSystem.current().familyName
 def libDebugLib = file(OperatingSystem.current().getSharedLibraryName("../org.eclipse.fx.drift.samples.cpp.native/build/lib/main/debug/$os/samples"))
 def libReleaseLib = file(OperatingSystem.current().getSharedLibraryName("../org.eclipse.fx.drift.samples.cpp.native/build/lib/main/release/$os/samples"))
 
 task showLibs() {
+  dependsOn ':org.eclipse.fx.drift.samples.cpp.native:build'
 	doLast {
 		println OperatingSystem.current().familyName
 		println libDebugLib
@@ -26,22 +25,13 @@ task showLibs() {
 }
 
 task copyDebugLib(type: Copy) {
-	//project(':org.eclipse.fx.drift.samples.cpp.native')
+  dependsOn ':org.eclipse.fx.drift.samples.cpp.native:build'
 	from libDebugLib
 	into file('src/main/resources/native')
 }
 
-def isJava11() {
-	true
-}
-
-if (isJava11()) {
-
-	javafx {
-		version = "11.0.2"
-		modules = [ 'javafx.controls' ]
-	}
-	
+javafx {
+  modules = [ 'javafx.controls' ]
 }
 
 dependencies {
@@ -60,3 +50,5 @@ jar {
         attributes('Import-Package': '!javafx.*, *')
 	}
 }
+
+tasks.named('processResources').get().dependsOn 'copyDebugLib'

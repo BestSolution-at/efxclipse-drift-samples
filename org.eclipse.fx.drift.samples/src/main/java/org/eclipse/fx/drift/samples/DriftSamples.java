@@ -2,9 +2,11 @@ package org.eclipse.fx.drift.samples;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.eclipse.fx.core.ServiceUtils;
 
@@ -18,11 +20,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
@@ -33,13 +37,31 @@ public class DriftSamples extends Application {
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		primaryStage.setTitle("DriftFX Samples");
+    String home = System.getProperty("java.home");
+    String version = System.getProperty("java.version");
+		primaryStage.setTitle("DriftFX Samples on " + version + " (" + home + ")");
 		tabPane = new TabPane();
 		
 		tabPane.getTabs().add(createWelcomeTab());
 		tabPane.setPrefSize(600, 400);
 		
-		Scene scene = new Scene(tabPane);
+    BorderPane root = new BorderPane();
+    root.setCenter(tabPane);
+    VBox left = new VBox();
+    VBox right = new VBox();
+    Stream.of("java.home", "java.version", "java.vendor", "os.arch")
+    .forEach(a -> {
+      Label l = new Label(a);
+      l.setPrefWidth(200);
+      left.getChildren().add(l);
+      Label r = new Label(System.getProperty(a));
+      right.getChildren().add(r);
+    } );
+    HBox info = new HBox(left, right);
+    info.setStyle("-fx-padding: 15px;");
+    root.setTop(info);
+    
+		Scene scene = new Scene(root);
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
@@ -52,6 +74,9 @@ public class DriftSamples extends Application {
 		tab.setText("Welcome to DriftFX");
 		
 		BorderPane root = new BorderPane();
+
+    
+
 		ScrollPane scroll = new ScrollPane(root);
 		scroll.setFitToWidth(true);
 		

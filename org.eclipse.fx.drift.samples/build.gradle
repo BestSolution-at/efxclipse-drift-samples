@@ -1,9 +1,9 @@
 plugins {
-    id 'java'
-    id "biz.aQute.bnd.builder"
-    id 'eclipse'
-    
-    id 'org.openjfx.javafxplugin'
+  id 'java'
+  id "biz.aQute.bnd.builder"
+  // id 'eclipse'
+  
+  id 'org.openjfx.javafxplugin'
     
 }
 
@@ -12,21 +12,9 @@ java {
 	targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-
-def isJava11() {
-	true
+javafx {
+  modules = [ 'javafx.controls' ]
 }
-
-if (isJava11()) {
-
-	javafx {
-		version = "11.0.2"
-		modules = [ 'javafx.controls' ]
-	}
-	
-}
-
-
 
 dependencies {
     implementation 'org.eclipse.fx:org.eclipse.fx.drift:999.0.0-SNAPSHOT'
