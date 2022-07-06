@@ -31,6 +31,7 @@ task copyDebugLib(type: Copy) {
 }
 
 javafx {
+  version = "17.0.2"
   modules = [ 'javafx.controls' ]
 }
 
