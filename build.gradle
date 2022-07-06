@@ -175,6 +175,8 @@ def createJDKTasks(details) {
 
   def qualifier = "${details.javafx ? 'fx-' : ''}$version-$os-${arch}_$bit"
 
+  def homePath = details.os == "macos" ? "/zulu-${version}.${details.bundle_type}/Contents/Home" : ''
+
   def downloadTarget = new File(buildDir, "/download")
   def extractTarget = new File(buildDir, "/java")
 
@@ -216,12 +218,13 @@ def createJDKTasks(details) {
       from zipTree(tasks.named(downloadTaskName).get().dest)
     }
     if ("tar.gz" == details.ext) {
-      from tarTree(resources.gzip(tasks.named(downloadTaskName).get().dest))
+      from tarTree(tasks.named(downloadTaskName).get().dest)
     }
 
     // copy symlinks
     eachFile { fileSpec ->
       def sourcePath = FileSystems.getDefault().getPath(fileSpec.file.path)
+      //println " * $sourcePath symlink = ${Files.isSymbolicLink(sourcePath)}"
       if (Files.isSymbolicLink(sourcePath)) {
         fileSpec.exclude()
         def destinationPath = Paths.get("${destinationDir}/${fileSpec.relativePath}")
@@ -239,7 +242,7 @@ def createJDKTasks(details) {
     group = 'Java Setup'
     description = 'Provides a Java home and executable path'
     dependsOn tasks.named(extractTaskName)
-    javaHome = new File(extractTarget, "/$name")
+    javaHome = new File(extractTarget, "/$name$homePath")
   }
   tasks.register(showVersionTaskName, JavaExec) {
     group = 'Java Setup'
